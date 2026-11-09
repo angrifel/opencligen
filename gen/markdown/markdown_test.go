@@ -9,13 +9,24 @@ import (
 	"github.com/angrifel/opencligen/spec"
 )
 
+// TestGolden renders every case in specs/golden.
 func TestGolden(t *testing.T) {
-	m, _, err := spec.LoadFile("../../testdata/kitchen.json", spec.Options{})
+	for _, c := range golden.Cases(t, "../..") {
+		t.Run(c.Name, func(t *testing.T) {
+			m, _, err := spec.LoadFile(c.Spec, spec.Options{})
+			if err != nil {
+				t.Fatal(err)
+			}
+			golden.Assert(t, "../..", c.Name+"/markdown.md.golden", markdown.Generate(m, markdown.Options{}))
+		})
+	}
+}
+
+func TestIncludeHidden(t *testing.T) {
+	m, _, err := spec.LoadFile("../../specs/golden/kitchen/spec.json", spec.Options{})
 	if err != nil {
 		t.Fatal(err)
 	}
-	golden.Assert(t, "../..", "kitchen.md.golden", markdown.Generate(m, markdown.Options{}))
-
 	all := string(markdown.Generate(m, markdown.Options{IncludeHidden: true}))
 	for _, s := range []string{"`kitchen debug`", "`--secret`"} {
 		if !strings.Contains(all, s) {

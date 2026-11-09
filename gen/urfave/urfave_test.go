@@ -19,16 +19,22 @@ func load(t *testing.T, src string) *spec.Model {
 	return m
 }
 
+// TestGolden renders every case in specs/golden; Package is the case name and
+// Source the case's spec path from the repository root.
 func TestGolden(t *testing.T) {
-	m, _, err := spec.LoadFile("../../testdata/kitchen.json", spec.Options{})
-	if err != nil {
-		t.Fatal(err)
+	for _, c := range golden.Cases(t, "../..") {
+		t.Run(c.Name, func(t *testing.T) {
+			m, _, err := spec.LoadFile(c.Spec, spec.Options{})
+			if err != nil {
+				t.Fatal(err)
+			}
+			src, warns, err := urfave.Generate(m, urfave.Options{Package: c.Name, Source: "specs/golden/" + c.Name + "/spec.json"})
+			if err != nil || len(warns) > 0 {
+				t.Fatalf("err = %v, warnings = %v", err, warns)
+			}
+			golden.Assert(t, "../..", c.Name+"/urfave.go.golden", src)
+		})
 	}
-	src, warns, err := urfave.Generate(m, urfave.Options{Package: "kitchen", Source: "testdata/kitchen.json"})
-	if err != nil || len(warns) > 0 {
-		t.Fatalf("err = %v, warnings = %v", err, warns)
-	}
-	golden.Assert(t, "../..", "kitchen.go.golden", src)
 }
 
 func TestUnsupported(t *testing.T) {

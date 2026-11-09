@@ -4,7 +4,7 @@ Validate OpenCLI descriptions and generate code and docs from them
 
 opencligen validates OpenCLI descriptions (https://opencli.org/) against the OpenCLI schema and its own rules, and generates a urfave/cli v3 command tree in Go, a Markdown reference or a man page from them.
 
-The x- metadata it understands is described in docs/extensions.md.
+The x- metadata it understands is described in specs/extensions.md in the opencligen repository.
 
 | | |
 |---|---|

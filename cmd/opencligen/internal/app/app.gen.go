@@ -30,7 +30,7 @@ func New(h Handlers) *cli.Command {
 	return &cli.Command{
 		Name:        "opencligen",
 		Usage:       "Validate OpenCLI descriptions and generate code and docs from them",
-		Description: "opencligen validates OpenCLI descriptions (https://opencli.org/) against the OpenCLI schema and its own rules, and generates a urfave/cli v3 command tree in Go, a Markdown reference or a man page from them.\n\nThe x- metadata it understands is described in docs/extensions.md.\n\nExit codes:\n  0  Success\n  1  The description has errors, or the output cannot be generated\n  2  Invalid usage",
+		Description: "opencligen validates OpenCLI descriptions (https://opencli.org/) against the OpenCLI schema and its own rules, and generates a urfave/cli v3 command tree in Go, a Markdown reference or a man page from them.\n\nThe x- metadata it understands is described in specs/extensions.md in the opencligen repository.\n\nExit codes:\n  0  Success\n  1  The description has errors, or the output cannot be generated\n  2  Invalid usage",
 		Version:     "devel",
 		Flags: []cli.Flag{
 			&cli.BoolFlag{

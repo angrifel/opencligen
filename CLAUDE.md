@@ -1,8 +1,15 @@
 opencligen - validates OpenCLI descriptions (https://opencli.org/) and generates
 urfave/cli v3 Go code, Markdown and man pages from them.
 
-User-facing docs: README.md. The x- metadata vocabulary is defined in
-docs/extensions.md; keep it in sync with spec/value.go and spec/build.go.
+# Specs
+
+All specs are contained in the `specs/` directory; read specs/README.md
+first. It holds opencligen's own CLI description (specs/opencligen.json),
+the x- metadata vocabulary (specs/extensions.md; keep it in sync with
+spec/value.go and spec/build.go), the generated CLI reference
+(specs/cli.md, specs/opencligen.1) and the golden cases (specs/golden/),
+which define the exact expected output of every generator. When code and
+specs disagree, the specs win. User-facing overview: README.md.
 
 # Commands
 
@@ -12,7 +19,7 @@ docs/extensions.md; keep it in sync with spec/value.go and spec/build.go.
   directly, so it works even when the committed generated code is broken.
 - `make test`: vet, gofmt check, all tests (includes building generated code).
 - `make update-golden`: accept intended changes to generator output; review the
-  diff of testdata/golden before committing.
+  diff of specs/golden before committing.
 - `make update-upstream`: refresh schema/ and testdata/upstream/ from
   OPENCLI_REF in the Makefile.
 
@@ -30,10 +37,11 @@ docs/extensions.md; keep it in sync with spec/value.go and spec/build.go.
   `make generate` and TestGeneratedFilesUpToDate.
 - `cmd/opencligen`: the CLI. `internal/app/app.gen.go` is generated from
   `specs/opencligen.json`; `main.go` implements its `Handlers`.
-- `specs/opencligen.json`: the OpenCLI description of opencligen itself.
-  `docs/cli.md` and `docs/opencligen.1` are generated from it.
-- `testdata/kitchen.json`: test description exercising every feature; extend it
-  when adding one. `testdata/upstream/`: upstream examples used as a corpus.
+- `specs/`: all specifications and docs (see # Specs). `specs/golden/<case>/`
+  holds a golden case: `spec.json` plus one expected file per generator;
+  tests iterate over every case directory. The kitchen case exercises every
+  feature; extend it (or add a case) when adding one.
+- `testdata/upstream/`: upstream OpenCLI examples used as a test corpus.
 
 # Decisions
 
@@ -67,7 +75,7 @@ docs/extensions.md; keep it in sync with spec/value.go and spec/build.go.
   still load.
 - Documents with an OpenCLI version that has no schema directory are rejected.
 
-## Extensions (see docs/extensions.md)
+## Extensions (see specs/extensions.md)
 
 - `x-type`, `x-default`, `x-range` apply to options and positional arguments.
   The names follow the upstream ffmpeg example; dotnet's `x-value-type` is not

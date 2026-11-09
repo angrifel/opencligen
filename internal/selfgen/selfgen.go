@@ -34,7 +34,7 @@ func Files(root string) (map[string][]byte, error) {
 	}
 	return map[string][]byte{
 		"cmd/opencligen/internal/app/app.gen.go": code,
-		"docs/cli.md":                            markdown.Generate(m, markdown.Options{}),
-		"docs/opencligen.1":                      man.Generate(m, man.Options{}),
+		"specs/cli.md":                           markdown.Generate(m, markdown.Options{}),
+		"specs/opencligen.1":                     man.Generate(m, man.Options{}),
 	}, nil
 }

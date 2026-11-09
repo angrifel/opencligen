@@ -11,12 +11,17 @@ import (
 	"github.com/angrifel/opencligen/spec"
 )
 
+// TestGolden renders every case in specs/golden.
 func TestGolden(t *testing.T) {
-	m, _, err := spec.LoadFile("../../testdata/kitchen.json", spec.Options{})
-	if err != nil {
-		t.Fatal(err)
+	for _, c := range golden.Cases(t, "../..") {
+		t.Run(c.Name, func(t *testing.T) {
+			m, _, err := spec.LoadFile(c.Spec, spec.Options{})
+			if err != nil {
+				t.Fatal(err)
+			}
+			golden.Assert(t, "../..", c.Name+"/man.1.golden", man.Generate(m, man.Options{}))
+		})
 	}
-	golden.Assert(t, "../..", "kitchen.1.golden", man.Generate(m, man.Options{}))
 }
 
 // TestGroff renders pages with groff, when installed, and fails on warnings.
@@ -25,7 +30,7 @@ func TestGroff(t *testing.T) {
 	if err != nil {
 		t.Skip("groff not found")
 	}
-	for _, f := range []string{"../../testdata/kitchen.json", "../../testdata/upstream/git.json", "../../testdata/upstream/curl.json"} {
+	for _, f := range []string{"../../specs/golden/kitchen/spec.json", "../../testdata/upstream/git.json", "../../testdata/upstream/curl.json"} {
 		m, _, err := spec.LoadFile(f, spec.Options{})
 		if err != nil {
 			t.Fatal(err)

@@ -1,4 +1,5 @@
-// Package golden compares test output with files under testdata/golden.
+// Package golden compares test output with the golden cases under
+// specs/golden/<case>/.
 // Run the tests with -update to rewrite the files.
 package golden
 
@@ -12,12 +13,45 @@ import (
 
 var update = flag.Bool("update", false, "rewrite golden files")
 
-// Assert compares got with the golden file name, relative to the repository's
-// testdata/golden directory. dir is the path from the test's package to the
-// repository root.
+// Case is a golden case: a directory under specs/golden holding spec.json and
+// the expected output of each generator.
+type Case struct {
+	Name string // directory name, also used as the Go package name
+	Spec string // path to spec.json from the test's package
+}
+
+// Cases lists the golden cases. root is the path from the test's package to
+// the repository root.
+func Cases(t *testing.T, root string) []Case {
+	t.Helper()
+	dir := filepath.Join(root, "specs", "golden")
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var cases []Case
+	for _, e := range entries {
+		if !e.IsDir() {
+			continue
+		}
+		spec := filepath.Join(dir, e.Name(), "spec.json")
+		if _, err := os.Stat(spec); err != nil {
+			t.Fatalf("golden case %s: %v", e.Name(), err)
+		}
+		cases = append(cases, Case{Name: e.Name(), Spec: spec})
+	}
+	if len(cases) == 0 {
+		t.Fatalf("no golden cases in %s", dir)
+	}
+	return cases
+}
+
+// Assert compares got with the golden file name ("<case>/<file>"), relative
+// to the repository's specs/golden directory. root is the path from the
+// test's package to the repository root.
 func Assert(t *testing.T, root, name string, got []byte) {
 	t.Helper()
-	path := filepath.Join(root, "testdata", "golden", name)
+	path := filepath.Join(root, "specs", "golden", name)
 	if *update {
 		if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 			t.Fatal(err)

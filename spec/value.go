@@ -13,7 +13,7 @@ import (
 
 // Type is the type of an option or argument value. OpenCLI 0.1 has no value
 // types; opencligen reads them from the x-type metadata (see
-// docs/extensions.md).
+// specs/extensions.md).
 type Type string
 
 const (

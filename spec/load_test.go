@@ -230,7 +230,7 @@ func TestMultiDefaultDoesNotCorruptDocument(t *testing.T) {
 }
 
 func TestModel(t *testing.T) {
-	m, _, err := spec.LoadFile("../testdata/kitchen.json", spec.Options{})
+	m, _, err := spec.LoadFile("../specs/golden/kitchen/spec.json", spec.Options{})
 	if err != nil {
 		t.Fatal(err)
 	}
