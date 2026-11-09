@@ -17,6 +17,9 @@ cli.json:61:42: error: sheila generate-parser ll: option "-k": x-default: "x" is
 
 ## Install
 
+opencligen is not published yet; until then, build it from a local
+checkout. Once published:
+
 ```sh
 go install github.com/angrifel/opencligen/cmd/opencligen@latest
 ```
@@ -124,3 +127,7 @@ make update-upstream  # refresh the OpenCLI schema and examples
 
 The upstream examples in [testdata/upstream](testdata/upstream) are used as
 a test corpus.
+
+## License
+
+MIT; see [LICENSE](LICENSE).

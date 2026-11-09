@@ -170,6 +170,13 @@ specs disagree, the specs win. User-facing overview: README.md.
   the document: it reuses the backing array and corrupts the source bytes
   (a past bug; see TestMultiDefaultDoesNotCorruptDocument).
 
+# Status
+
+- Publishing is on hold (user decision): no remote, no version tags. The
+  README's install instructions describe the intended published state;
+  consumers such as sheila use a local `replace` meanwhile.
+- License: MIT (LICENSE).
+
 # Git
 
 - The default branch is `master`, not `main`.
