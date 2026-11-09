@@ -1,0 +1,114 @@
+# opencligen
+
+opencligen validates [OpenCLI](https://opencli.org/) descriptions and
+generates code and documentation from them:
+
+- **urfave**: a [urfave/cli v3](https://github.com/urfave/cli) command tree in
+  Go, with typed flags, defaults, range checks and positional argument checks.
+  You implement a generated `Handlers` interface; the rest is regenerated.
+- **markdown**: a single Markdown reference document.
+- **man**: a roff man page.
+
+Errors point at the exact place in the description:
+
+```
+cli.json:61:42: error: sheila generate-parser ll: option "-k": x-default: "x" is not a valid int
+```
+
+## Install
+
+```sh
+go install github.com/angrifel/opencligen/cmd/opencligen@latest
+```
+
+Or, in a Go module that uses it, as a tool dependency (Go 1.24+):
+
+```sh
+go get -tool github.com/angrifel/opencligen/cmd/opencligen
+go tool opencligen validate cli.json
+```
+
+## Use
+
+```sh
+opencligen validate cli.json
+opencligen urfave   -o internal/cli/cli.gen.go -package cli cli.json
+opencligen markdown -o docs/cli.md cli.json
+opencligen man      -o docs/mytool.1 cli.json
+```
+
+Flags for every command:
+
+- `-lenient`: report problems that can be worked around as warnings: x-
+  metadata that cannot be typed, and features the output cannot express.
+- `-allow-c-limits`: accept C limit constants such as `INT_MAX` in
+  `x-range` and `x-default`.
+
+Exit status is 0 on success, 1 when the description has errors or the output
+cannot be generated, and 2 for usage errors. An output file whose content is
+unchanged is not rewritten, so `make` and similar tools see it as up to date.
+
+### urfave/cli output
+
+For a description with `mytool build` and `mytool test`, the generated file
+declares
+
+```go
+type Handlers interface {
+	Build(ctx context.Context, cmd *cli.Command) error
+	Test(ctx context.Context, cmd *cli.Command) error
+}
+
+func New(h Handlers) *cli.Command
+```
+
+and your `main` wires it up:
+
+```go
+func main() {
+	if err := cli.New(myHandlers{}).Run(context.Background(), os.Args); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+}
+```
+
+Flag values are read with urfave/cli as usual (`cmd.Int("k")`,
+`cmd.String("format")`). The generated code imports
+`github.com/angrifel/opencligen/clirt`, a small runtime package for argument
+and value checks.
+
+## Types, defaults and ranges
+
+OpenCLI 0.1 has no value types. opencligen reads them from `x-type`,
+`x-default` and `x-range` metadata, and a few command-level entries such as
+`x-category` and `x-usage`. See [docs/extensions.md](docs/extensions.md).
+
+## As a library
+
+```go
+m, warnings, err := spec.LoadFile("cli.json", spec.Options{})
+src, genWarnings, err := urfave.Generate(m, urfave.Options{Package: "cli"})
+md := markdown.Generate(m, markdown.Options{})
+```
+
+`spec.Model` is the resolved description that every output renders from;
+new outputs only need to walk it.
+
+## Supported OpenCLI versions
+
+The OpenCLI schemas are embedded, one per `major.minor` version, under
+[schema/](schema/). Documents with an unknown version are rejected. OpenCLI
+is still a proposal; when a new version is published, its schema is added
+next to the existing ones.
+
+## Development
+
+```sh
+make test             # all tests, including building and running generated code
+make update-golden    # accept changed generator output
+make update-upstream  # refresh the OpenCLI schema and examples
+```
+
+The upstream examples in [testdata/upstream](testdata/upstream) are used as
+a test corpus.

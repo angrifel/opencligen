@@ -1,0 +1,113 @@
+opencligen - validates OpenCLI descriptions (https://opencli.org/) and generates
+urfave/cli v3 Go code, Markdown and man pages from them.
+
+User-facing docs: README.md. The x- metadata vocabulary is defined in
+docs/extensions.md; keep it in sync with spec/value.go and spec/build.go.
+
+# Commands
+
+- `make test`: vet, gofmt check, all tests (includes building generated code).
+- `make update-golden`: accept intended changes to generator output; review the
+  diff of testdata/golden before committing.
+- `make update-upstream`: refresh schema/ and testdata/upstream/ from
+  OPENCLI_REF in the Makefile.
+
+# Layout
+
+- `schema/<major.minor>/schema.json`: upstream OpenCLI schemas, unmodified,
+  embedded. One directory per supported version.
+- `spec/`: loads and validates a document into a `spec.Model`. All parsing and
+  semantic rules live here.
+- `gen/urfave`, `gen/markdown`, `gen/man`: outputs; `gen/docs` has shared
+  helpers for the documentation outputs.
+- `clirt/`: runtime package imported by generated urfave code.
+- `cmd/opencligen`: the CLI.
+- `testdata/kitchen.json`: test description exercising every feature; extend it
+  when adding one. `testdata/upstream/`: upstream examples used as a corpus.
+
+# Decisions
+
+## Architecture
+
+- Generators render only from `spec.Model`; they never re-read the JSON. A new
+  output is a new package under gen/ that walks the model.
+- Generator-specific problems are reported with `Model.Diagnostic`, so they
+  carry file:line:col like loader errors.
+- Library code takes options structs (`spec.Options`, `urfave.Options`, ...);
+  no package-level state.
+- Generated urfave code imports `clirt` instead of inlining helpers. This
+  makes users depend on this module at runtime; that trade-off was accepted.
+
+## Strictness
+
+- Errors by default. `Lenient` downgrades only problems that have a sensible
+  fallback (untypeable x- metadata becomes untyped; urfave limitations get an
+  approximation) and always reports a warning.
+- C limit constants (INT_MAX, -FLT_MAX, I64_MIN, ...) are accepted only with
+  `AllowCLimits` / `-allow-c-limits`. The user decided this must be opt-in,
+  separate from `-lenient`. Plain numeric strings ("12", "2.14748e+09") are
+  accepted by default.
+- Unknown metadata names are ignored, so documents written for other tools
+  still load.
+- Documents with an OpenCLI version that has no schema directory are rejected.
+
+## Extensions (see docs/extensions.md)
+
+- `x-type`, `x-default`, `x-range` apply to options and positional arguments.
+  The names follow the upstream ffmpeg example; dotnet's `x-value-type` is not
+  read. Defaults are real JSON values, but strings are accepted too because
+  upstream exporters write everything as text.
+- Command metadata `x-category`, `x-usage`, `x-documentation` mirror what the
+  upstream examples already use. `x-go-name` is ours and urfave-only.
+- OpenCLI allows a subcommand to shadow a name of an inherited recursive option
+  (git's `grep -h`), so the spec package accepts it. Only the urfave output
+  rejects it, because urfave/cli v3 then drops the whole inherited flag in that
+  subcommand (verified by experiment).
+
+## urfave output
+
+- Built against urfave/cli v3.14.0. It relies on v3 dropping clashing -h/-v
+  aliases from its own help/version flags; re-check when upgrading.
+- `--help` (any command) and the root `--version` (when info.version is set)
+  are not generated; urfave/cli provides them.
+- `conventions.groupOptions` maps to `UseShortOptionHandling` on the root.
+  Option separators other than " " and "=" are unsupported.
+- Boolean options that take a value ("-flag true") become `StringFlag` with
+  `clirt.Bool`, because `BoolFlag` never consumes an argument.
+- Options with more than one argument per use are unsupported (none exist in
+  the upstream corpus); lenient mode makes them repeatable flags.
+- Handlers: one method per runnable command (leaves, and groups that take
+  positional arguments), named by CamelCasing the path without the root, root
+  is `Root`, listed parents first.
+- The summary is not repeated at the start of Description; docs outputs do the
+  same via `docs.Details`.
+
+## Docs outputs
+
+- One Markdown file and one man page for the whole command tree.
+- Hidden commands, options and arguments are left out unless `-hidden`.
+- The man page has no date unless `-date` is given, so output is reproducible.
+
+## CLI
+
+- Exit codes: 0 ok, 1 invalid description or generation error, 2 usage.
+- An output file whose content would not change is not rewritten, so make
+  sees it as up to date.
+
+# Testing
+
+- Every user-visible error message has a case in spec/load_test.go or
+  gen/urfave/urfave_test.go, including its line:col where relevant.
+- gen/urfave/e2e_test.go builds the generated kitchen CLI in a scratch module
+  (GOPROXY=off, replace to this repo) and runs it; it also compiles the
+  git, curl and ffmpeg output. Skipped with -short.
+- Upstream corpus expectations (dotnet has real duplicate names; ffmpeg needs
+  -lenient and -allow-c-limits, 138 warnings) are asserted in
+  spec/load_test.go. Update them deliberately when refreshing the corpus.
+- Never json.Unmarshal into a slice that already holds a json.RawMessage of
+  the document: it reuses the backing array and corrupts the source bytes
+  (a past bug; see TestMultiDefaultDoesNotCorruptDocument).
+
+# Git
+
+- The default branch is `master`, not `main`.

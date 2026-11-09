@@ -1,0 +1,116 @@
+{
+	"opencli": "0.1",
+	"info": {
+		"title": "Kitchen",
+		"summary": "Exercises every feature opencligen supports",
+		"description": "A test CLI.\n\nIt covers types, defaults, ranges, positional arguments and metadata.",
+		"version": "1.2.3",
+		"contact": { "name": "Kitchen team", "url": "https://example.com", "email": "team@example.com" },
+		"license": { "name": "MIT License", "identifier": "MIT" }
+	},
+	"conventions": { "groupOptions": true, "optionSeparator": " " },
+	"command": {
+		"name": "kitchen",
+		"options": [
+			{ "name": "--verbose", "aliases": ["-v"], "description": "Print more", "recursive": true },
+			{ "name": "--help", "aliases": ["-h"], "description": "Show help", "recursive": true },
+			{ "name": "--version", "description": "Show the version" }
+		],
+		"metadata": [
+			{ "name": "x-documentation", "value": "https://example.com/docs" }
+		],
+		"commands": [
+			{
+				"name": "cook",
+				"aliases": ["c"],
+				"description": "Cook a dish\n\nCooks the given dish with the given options.",
+				"examples": ["kitchen cook pasta 2", "kitchen cook --heat 7 soup"],
+				"exitCodes": [
+					{ "code": 0, "description": "Served" },
+					{ "code": 3, "description": "Burnt" }
+				],
+				"metadata": [
+					{ "name": "x-category", "value": "Meals" },
+					{ "name": "x-usage", "value": ["kitchen cook [options] <dish> [<servings>]"] }
+				],
+				"options": [
+					{
+						"name": "--heat",
+						"description": "Heat level",
+						"arguments": [{ "name": "level", "required": true }],
+						"metadata": [
+							{ "name": "x-type", "value": "int" },
+							{ "name": "x-default", "value": 5 },
+							{ "name": "x-range", "value": { "minimum": 1, "maximum": 9 } }
+						]
+					},
+					{
+						"name": "--timer",
+						"arguments": [{ "name": "duration", "required": true }],
+						"metadata": [
+							{ "name": "x-type", "value": "duration" },
+							{ "name": "x-default", "value": "1m30s" }
+						]
+					},
+					{
+						"name": "--style",
+						"group": "Presentation",
+						"arguments": [{ "name": "style", "required": true, "acceptedValues": ["plain", "fancy"] }],
+						"metadata": [{ "name": "x-default", "value": "plain" }]
+					},
+					{
+						"name": "--weights",
+						"aliases": ["-w"],
+						"arguments": [{ "name": "kg", "required": true, "arity": { "minimum": 1, "maximum": 4 } }],
+						"metadata": [
+							{ "name": "x-type", "value": "float" },
+							{ "name": "x-default", "value": [0.5, 2] },
+							{ "name": "x-range", "value": { "minimum": 0 } }
+						]
+					},
+					{
+						"name": "--salt",
+						"arguments": [{ "name": "bool", "required": true }],
+						"metadata": [
+							{ "name": "x-type", "value": "boolean" },
+							{ "name": "x-default", "value": "true" }
+						]
+					},
+					{
+						"name": "--batch",
+						"required": true,
+						"arguments": [{ "name": "id", "required": true }],
+						"metadata": [{ "name": "x-type", "value": "uint" }]
+					},
+					{ "name": "--secret", "hidden": true, "description": "Not documented" }
+				],
+				"arguments": [
+					{ "name": "dish", "required": true, "acceptedValues": ["pasta", "soup", "salad"] },
+					{
+						"name": "servings",
+						"description": "How many people",
+						"metadata": [
+							{ "name": "x-type", "value": "int" },
+							{ "name": "x-range", "value": { "minimum": 1, "maximum": 12 } }
+						]
+					}
+				]
+			},
+			{
+				"name": "pantry",
+				"description": "Manage the pantry",
+				"arguments": [{ "name": "shelf", "arity": { "minimum": 1, "maximum": 3 } }],
+				"commands": [
+					{
+						"name": "add",
+						"interactive": true,
+						"description": "Add items",
+						"metadata": [{ "name": "x-go-name", "value": "AddToPantry" }],
+						"arguments": [{ "name": "item", "required": true, "arity": { "minimum": 1, "maximum": 5 } }]
+					}
+				]
+			},
+			{ "name": "debug", "hidden": true, "description": "Internal" }
+		]
+	}
+}
