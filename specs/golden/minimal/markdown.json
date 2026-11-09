@@ -1,0 +1,37 @@
+{
+  "level": 0,
+  "heading": "",
+  "sections": [
+    {
+      "level": 1,
+      "heading": "Hello",
+      "blocks": [
+        {
+          "kind": "table",
+          "header": [
+            "",
+            ""
+          ],
+          "rows": [
+            [
+              "Version",
+              "1.0.0"
+            ]
+          ]
+        }
+      ],
+      "sections": [
+        {
+          "level": 2,
+          "heading": "`hello`",
+          "blocks": [
+            {
+              "kind": "code",
+              "text": "hello"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

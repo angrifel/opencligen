@@ -178,7 +178,7 @@ func (g *generator) command(c *spec.Command) {
 			if a.Required {
 				desc = join("Required.", desc)
 			}
-			g.p("| %s | %s | %s |\n", name, cell(strings.Join(docs.ValueFacts(a.Value), "; ")), cell(desc))
+			g.p("| %s | %s | %s |\n", cell(name), cell(strings.Join(docs.ValueFacts(a.Value), "; ")), cell(desc))
 		}
 		g.p("\n")
 	}
@@ -192,7 +192,7 @@ func (g *generator) command(c *spec.Command) {
 	if len(subs) > 0 {
 		g.p("### Subcommands\n\n| Command | Description |\n|---|---|\n")
 		for _, s := range subs {
-			g.p("| [`%s`](#%s) | %s |\n", s.Name, anchor(s.FullName()), cell(s.Summary))
+			g.p("| %s | %s |\n", cell("[`"+s.Name+"`](#"+anchor(s.FullName())+")"), cell(s.Summary))
 		}
 		g.p("\n")
 	}
@@ -227,7 +227,7 @@ func (g *generator) optionTable(opts []*spec.Option) {
 		if o.Group != "" {
 			desc = join(desc, "Group: "+o.Group+".")
 		}
-		g.p("| %s | %s | %s |\n", names, cell(value), cell(desc))
+		g.p("| %s | %s | %s |\n", cell(names), cell(value), cell(desc))
 	}
 	g.p("\n")
 }
@@ -251,7 +251,8 @@ func code(ss ...string) string {
 	return strings.Join(q, ", ")
 }
 
-// cell escapes text for a table cell.
+// cell escapes text for a table cell. Every cell goes through it: a "|" in
+// any value, even inside inline code, would otherwise split the cell.
 func cell(s string) string {
 	s = strings.ReplaceAll(s, "|", `\|`)
 	s = strings.ReplaceAll(strings.TrimSpace(s), "\n\n", "<br><br>")

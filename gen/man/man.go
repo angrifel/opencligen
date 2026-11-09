@@ -59,9 +59,19 @@ func optName(s string) string {
 
 // text writes paragraphs, one roff line per source line.
 func (g *generator) text(s string) {
+	g.paragraphs(s, ".PP")
+}
+
+// entryText writes the body of a .TP entry. Paragraphs after the first use
+// .IP, which keeps them indented under the entry; .PP would end it.
+func (g *generator) entryText(s string) {
+	g.paragraphs(s, ".IP")
+}
+
+func (g *generator) paragraphs(s, sep string) {
 	for i, para := range strings.Split(strings.TrimSpace(s), "\n\n") {
 		if i > 0 {
-			g.req(".PP")
+			g.req(sep)
 		}
 		for _, l := range strings.Split(para, "\n") {
 			if l = strings.TrimSpace(l); l != "" {
@@ -202,7 +212,7 @@ func (g *generator) options(opts []*spec.Option) {
 			desc = strings.TrimSpace(desc + " (" + strings.Join(facts, "; ") + ")")
 		}
 		if desc != "" {
-			g.text(desc)
+			g.entryText(desc)
 		}
 	}
 }
@@ -223,7 +233,7 @@ func (g *generator) arguments(args []*spec.Argument) {
 			desc = strings.TrimSpace(desc + " (" + strings.Join(facts, "; ") + ")")
 		}
 		if desc != "" {
-			g.text(desc)
+			g.entryText(desc)
 		}
 	}
 }
@@ -244,7 +254,7 @@ func (g *generator) exitCodes(codes []spec.ExitCode) {
 		g.req(".TP")
 		g.line(fmt.Sprintf(`\fB%d\fR`, e.Code))
 		if e.Description != "" {
-			g.text(e.Description)
+			g.entryText(e.Description)
 		}
 	}
 }

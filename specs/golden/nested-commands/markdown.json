@@ -1,0 +1,1125 @@
+{
+  "level": 0,
+  "heading": "",
+  "sections": [
+    {
+      "level": 1,
+      "heading": "Repo",
+      "blocks": [
+        {
+          "kind": "paragraph",
+          "text": "A fictional repository tool with commands nested four levels deep"
+        },
+        {
+          "kind": "table",
+          "header": [
+            "",
+            ""
+          ],
+          "rows": [
+            [
+              "Version",
+              "2.0.0"
+            ]
+          ]
+        }
+      ],
+      "sections": [
+        {
+          "level": 2,
+          "heading": "Commands",
+          "blocks": [
+            {
+              "kind": "list",
+              "items": [
+                {
+                  "depth": 0,
+                  "text": "[`repo`](#repo): A fictional repository tool with commands nested four levels deep"
+                },
+                {
+                  "depth": 1,
+                  "text": "[`repo remote`](#repo-remote): Manage remotes"
+                },
+                {
+                  "depth": 2,
+                  "text": "[`repo remote add`](#repo-remote-add): Add a remote"
+                },
+                {
+                  "depth": 2,
+                  "text": "[`repo remote list`](#repo-remote-list): List remotes"
+                },
+                {
+                  "depth": 2,
+                  "text": "[`repo remote set-url`](#repo-remote-set-url): Change the URL of a remote"
+                },
+                {
+                  "depth": 2,
+                  "text": "[`repo remote branch`](#repo-remote-branch): Manage the branches of a remote"
+                },
+                {
+                  "depth": 3,
+                  "text": "[`repo remote branch list`](#repo-remote-branch-list): List the branches of a remote"
+                },
+                {
+                  "depth": 1,
+                  "text": "[`repo branch`](#repo-branch): Manage local branches"
+                },
+                {
+                  "depth": 2,
+                  "text": "[`repo branch list`](#repo-branch-list): List local branches"
+                },
+                {
+                  "depth": 2,
+                  "text": "[`repo branch create`](#repo-branch-create): Create a branch"
+                },
+                {
+                  "depth": 2,
+                  "text": "[`repo branch delete`](#repo-branch-delete): Delete branches"
+                },
+                {
+                  "depth": 1,
+                  "text": "[`repo config`](#repo-config): Read or write configuration"
+                },
+                {
+                  "depth": 2,
+                  "text": "[`repo config edit`](#repo-config-edit): Open the configuration in an editor"
+                },
+                {
+                  "depth": 1,
+                  "text": "[`repo sync`](#repo-sync): Synchronise with all remotes"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "level": 2,
+          "heading": "`repo`",
+          "blocks": [
+            {
+              "kind": "code",
+              "text": "repo [options] \u003ccommand\u003e"
+            }
+          ],
+          "sections": [
+            {
+              "level": 3,
+              "heading": "Options",
+              "blocks": [
+                {
+                  "kind": "table",
+                  "header": [
+                    "Option",
+                    "Value",
+                    "Description"
+                  ],
+                  "rows": [
+                    [
+                      "`--verbose`, `-v`",
+                      "",
+                      "Print more"
+                    ],
+                    [
+                      "`--config`",
+                      "`\u003cfile\u003e`",
+                      "Configuration file"
+                    ],
+                    [
+                      "`--color`",
+                      "",
+                      "Only for the root command"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "level": 3,
+              "heading": "Subcommands",
+              "blocks": [
+                {
+                  "kind": "table",
+                  "header": [
+                    "Command",
+                    "Description"
+                  ],
+                  "rows": [
+                    [
+                      "[`remote`](#repo-remote)",
+                      "Manage remotes"
+                    ],
+                    [
+                      "[`branch`](#repo-branch)",
+                      "Manage local branches"
+                    ],
+                    [
+                      "[`config`](#repo-config)",
+                      "Read or write configuration"
+                    ],
+                    [
+                      "[`sync`](#repo-sync)",
+                      "Synchronise with all remotes"
+                    ]
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "level": 2,
+          "heading": "`repo remote`",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "Manage remotes"
+            },
+            {
+              "kind": "paragraph",
+              "text": "Aliases: `r`"
+            },
+            {
+              "kind": "code",
+              "text": "repo remote [options] \u003ccommand\u003e"
+            }
+          ],
+          "sections": [
+            {
+              "level": 3,
+              "heading": "Options",
+              "blocks": [
+                {
+                  "kind": "table",
+                  "header": [
+                    "Option",
+                    "Value",
+                    "Description"
+                  ],
+                  "rows": [
+                    [
+                      "`--dry-run`",
+                      "",
+                      "Show what would change"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "level": 3,
+              "heading": "Inherited options",
+              "blocks": [
+                {
+                  "kind": "table",
+                  "header": [
+                    "Option",
+                    "Value",
+                    "Description"
+                  ],
+                  "rows": [
+                    [
+                      "`--verbose`, `-v`",
+                      "",
+                      "Print more"
+                    ],
+                    [
+                      "`--config`",
+                      "`\u003cfile\u003e`",
+                      "Configuration file"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "level": 3,
+              "heading": "Subcommands",
+              "blocks": [
+                {
+                  "kind": "table",
+                  "header": [
+                    "Command",
+                    "Description"
+                  ],
+                  "rows": [
+                    [
+                      "[`add`](#repo-remote-add)",
+                      "Add a remote"
+                    ],
+                    [
+                      "[`list`](#repo-remote-list)",
+                      "List remotes"
+                    ],
+                    [
+                      "[`set-url`](#repo-remote-set-url)",
+                      "Change the URL of a remote"
+                    ],
+                    [
+                      "[`branch`](#repo-remote-branch)",
+                      "Manage the branches of a remote"
+                    ]
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "level": 2,
+          "heading": "`repo remote add`",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "Add a remote"
+            },
+            {
+              "kind": "code",
+              "text": "repo remote add [options] \u003cname\u003e \u003curl\u003e"
+            }
+          ],
+          "sections": [
+            {
+              "level": 3,
+              "heading": "Options",
+              "blocks": [
+                {
+                  "kind": "table",
+                  "header": [
+                    "Option",
+                    "Value",
+                    "Description"
+                  ],
+                  "rows": [
+                    [
+                      "`--fetch`",
+                      "",
+                      "Fetch after adding"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "level": 3,
+              "heading": "Inherited options",
+              "blocks": [
+                {
+                  "kind": "table",
+                  "header": [
+                    "Option",
+                    "Value",
+                    "Description"
+                  ],
+                  "rows": [
+                    [
+                      "`--dry-run`",
+                      "",
+                      "Show what would change"
+                    ],
+                    [
+                      "`--verbose`, `-v`",
+                      "",
+                      "Print more"
+                    ],
+                    [
+                      "`--config`",
+                      "`\u003cfile\u003e`",
+                      "Configuration file"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "level": 3,
+              "heading": "Arguments",
+              "blocks": [
+                {
+                  "kind": "table",
+                  "header": [
+                    "Argument",
+                    "Values",
+                    "Description"
+                  ],
+                  "rows": [
+                    [
+                      "`\u003cname\u003e`",
+                      "",
+                      "Required."
+                    ],
+                    [
+                      "`\u003curl\u003e`",
+                      "",
+                      "Required."
+                    ]
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "level": 2,
+          "heading": "`repo remote list`",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "List remotes"
+            },
+            {
+              "kind": "paragraph",
+              "text": "Aliases: `ls`"
+            },
+            {
+              "kind": "code",
+              "text": "repo remote list [options] [\u003cpattern\u003e]"
+            }
+          ],
+          "sections": [
+            {
+              "level": 3,
+              "heading": "Inherited options",
+              "blocks": [
+                {
+                  "kind": "table",
+                  "header": [
+                    "Option",
+                    "Value",
+                    "Description"
+                  ],
+                  "rows": [
+                    [
+                      "`--dry-run`",
+                      "",
+                      "Show what would change"
+                    ],
+                    [
+                      "`--verbose`, `-v`",
+                      "",
+                      "Print more"
+                    ],
+                    [
+                      "`--config`",
+                      "`\u003cfile\u003e`",
+                      "Configuration file"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "level": 3,
+              "heading": "Arguments",
+              "blocks": [
+                {
+                  "kind": "table",
+                  "header": [
+                    "Argument",
+                    "Values",
+                    "Description"
+                  ],
+                  "rows": [
+                    [
+                      "`\u003cpattern\u003e`",
+                      "",
+                      ""
+                    ]
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "level": 2,
+          "heading": "`repo remote set-url`",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "Change the URL of a remote"
+            },
+            {
+              "kind": "code",
+              "text": "repo remote set-url [options] \u003cname\u003e \u003curl\u003e"
+            }
+          ],
+          "sections": [
+            {
+              "level": 3,
+              "heading": "Inherited options",
+              "blocks": [
+                {
+                  "kind": "table",
+                  "header": [
+                    "Option",
+                    "Value",
+                    "Description"
+                  ],
+                  "rows": [
+                    [
+                      "`--dry-run`",
+                      "",
+                      "Show what would change"
+                    ],
+                    [
+                      "`--verbose`, `-v`",
+                      "",
+                      "Print more"
+                    ],
+                    [
+                      "`--config`",
+                      "`\u003cfile\u003e`",
+                      "Configuration file"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "level": 3,
+              "heading": "Arguments",
+              "blocks": [
+                {
+                  "kind": "table",
+                  "header": [
+                    "Argument",
+                    "Values",
+                    "Description"
+                  ],
+                  "rows": [
+                    [
+                      "`\u003cname\u003e`",
+                      "",
+                      "Required."
+                    ],
+                    [
+                      "`\u003curl\u003e`",
+                      "",
+                      "Required."
+                    ]
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "level": 2,
+          "heading": "`repo remote branch`",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "Manage the branches of a remote"
+            },
+            {
+              "kind": "code",
+              "text": "repo remote branch [options] \u003ccommand\u003e"
+            }
+          ],
+          "sections": [
+            {
+              "level": 3,
+              "heading": "Options",
+              "blocks": [
+                {
+                  "kind": "table",
+                  "header": [
+                    "Option",
+                    "Value",
+                    "Description"
+                  ],
+                  "rows": [
+                    [
+                      "`--dry-run`",
+                      "",
+                      "Show what would change"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "level": 3,
+              "heading": "Inherited options",
+              "blocks": [
+                {
+                  "kind": "table",
+                  "header": [
+                    "Option",
+                    "Value",
+                    "Description"
+                  ],
+                  "rows": [
+                    [
+                      "`--verbose`, `-v`",
+                      "",
+                      "Print more"
+                    ],
+                    [
+                      "`--config`",
+                      "`\u003cfile\u003e`",
+                      "Configuration file"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "level": 3,
+              "heading": "Subcommands",
+              "blocks": [
+                {
+                  "kind": "table",
+                  "header": [
+                    "Command",
+                    "Description"
+                  ],
+                  "rows": [
+                    [
+                      "[`list`](#repo-remote-branch-list)",
+                      "List the branches of a remote"
+                    ]
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "level": 2,
+          "heading": "`repo remote branch list`",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "List the branches of a remote"
+            },
+            {
+              "kind": "code",
+              "text": "repo remote branch list [options] \u003cremote\u003e"
+            }
+          ],
+          "sections": [
+            {
+              "level": 3,
+              "heading": "Inherited options",
+              "blocks": [
+                {
+                  "kind": "table",
+                  "header": [
+                    "Option",
+                    "Value",
+                    "Description"
+                  ],
+                  "rows": [
+                    [
+                      "`--dry-run`",
+                      "",
+                      "Show what would change"
+                    ],
+                    [
+                      "`--verbose`, `-v`",
+                      "",
+                      "Print more"
+                    ],
+                    [
+                      "`--config`",
+                      "`\u003cfile\u003e`",
+                      "Configuration file"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "level": 3,
+              "heading": "Arguments",
+              "blocks": [
+                {
+                  "kind": "table",
+                  "header": [
+                    "Argument",
+                    "Values",
+                    "Description"
+                  ],
+                  "rows": [
+                    [
+                      "`\u003cremote\u003e`",
+                      "",
+                      "Required."
+                    ]
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "level": 2,
+          "heading": "`repo branch`",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "Manage local branches"
+            },
+            {
+              "kind": "paragraph",
+              "text": "Category: Branches"
+            },
+            {
+              "kind": "code",
+              "text": "repo branch [options] \u003ccommand\u003e"
+            }
+          ],
+          "sections": [
+            {
+              "level": 3,
+              "heading": "Inherited options",
+              "blocks": [
+                {
+                  "kind": "table",
+                  "header": [
+                    "Option",
+                    "Value",
+                    "Description"
+                  ],
+                  "rows": [
+                    [
+                      "`--verbose`, `-v`",
+                      "",
+                      "Print more"
+                    ],
+                    [
+                      "`--config`",
+                      "`\u003cfile\u003e`",
+                      "Configuration file"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "level": 3,
+              "heading": "Subcommands",
+              "blocks": [
+                {
+                  "kind": "table",
+                  "header": [
+                    "Command",
+                    "Description"
+                  ],
+                  "rows": [
+                    [
+                      "[`list`](#repo-branch-list)",
+                      "List local branches"
+                    ],
+                    [
+                      "[`create`](#repo-branch-create)",
+                      "Create a branch"
+                    ],
+                    [
+                      "[`delete`](#repo-branch-delete)",
+                      "Delete branches"
+                    ]
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "level": 2,
+          "heading": "`repo branch list`",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "List local branches"
+            },
+            {
+              "kind": "code",
+              "text": "repo branch list [options]"
+            }
+          ],
+          "sections": [
+            {
+              "level": 3,
+              "heading": "Inherited options",
+              "blocks": [
+                {
+                  "kind": "table",
+                  "header": [
+                    "Option",
+                    "Value",
+                    "Description"
+                  ],
+                  "rows": [
+                    [
+                      "`--verbose`, `-v`",
+                      "",
+                      "Print more"
+                    ],
+                    [
+                      "`--config`",
+                      "`\u003cfile\u003e`",
+                      "Configuration file"
+                    ]
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "level": 2,
+          "heading": "`repo branch create`",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "Create a branch"
+            },
+            {
+              "kind": "code",
+              "text": "repo branch create [options] \u003cname\u003e"
+            }
+          ],
+          "sections": [
+            {
+              "level": 3,
+              "heading": "Inherited options",
+              "blocks": [
+                {
+                  "kind": "table",
+                  "header": [
+                    "Option",
+                    "Value",
+                    "Description"
+                  ],
+                  "rows": [
+                    [
+                      "`--verbose`, `-v`",
+                      "",
+                      "Print more"
+                    ],
+                    [
+                      "`--config`",
+                      "`\u003cfile\u003e`",
+                      "Configuration file"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "level": 3,
+              "heading": "Arguments",
+              "blocks": [
+                {
+                  "kind": "table",
+                  "header": [
+                    "Argument",
+                    "Values",
+                    "Description"
+                  ],
+                  "rows": [
+                    [
+                      "`\u003cname\u003e`",
+                      "",
+                      "Required."
+                    ]
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "level": 2,
+          "heading": "`repo branch delete`",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "Delete branches"
+            },
+            {
+              "kind": "paragraph",
+              "text": "Aliases: `rm`"
+            },
+            {
+              "kind": "code",
+              "text": "repo branch delete [options] \u003cname\u003e..."
+            }
+          ],
+          "sections": [
+            {
+              "level": 3,
+              "heading": "Options",
+              "blocks": [
+                {
+                  "kind": "table",
+                  "header": [
+                    "Option",
+                    "Value",
+                    "Description"
+                  ],
+                  "rows": [
+                    [
+                      "`--force`, `-f`",
+                      "",
+                      "Delete even if unmerged"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "level": 3,
+              "heading": "Inherited options",
+              "blocks": [
+                {
+                  "kind": "table",
+                  "header": [
+                    "Option",
+                    "Value",
+                    "Description"
+                  ],
+                  "rows": [
+                    [
+                      "`--verbose`, `-v`",
+                      "",
+                      "Print more"
+                    ],
+                    [
+                      "`--config`",
+                      "`\u003cfile\u003e`",
+                      "Configuration file"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "level": 3,
+              "heading": "Arguments",
+              "blocks": [
+                {
+                  "kind": "table",
+                  "header": [
+                    "Argument",
+                    "Values",
+                    "Description"
+                  ],
+                  "rows": [
+                    [
+                      "`\u003cname\u003e...`",
+                      "",
+                      "Required."
+                    ]
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "level": 2,
+          "heading": "`repo config`",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "Read or write configuration"
+            },
+            {
+              "kind": "paragraph",
+              "text": "With no key, prints the whole configuration."
+            },
+            {
+              "kind": "code",
+              "text": "repo config [options] [\u003ccommand\u003e] [\u003ckey\u003e] [\u003cvalue\u003e]"
+            }
+          ],
+          "sections": [
+            {
+              "level": 3,
+              "heading": "Inherited options",
+              "blocks": [
+                {
+                  "kind": "table",
+                  "header": [
+                    "Option",
+                    "Value",
+                    "Description"
+                  ],
+                  "rows": [
+                    [
+                      "`--verbose`, `-v`",
+                      "",
+                      "Print more"
+                    ],
+                    [
+                      "`--config`",
+                      "`\u003cfile\u003e`",
+                      "Configuration file"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "level": 3,
+              "heading": "Arguments",
+              "blocks": [
+                {
+                  "kind": "table",
+                  "header": [
+                    "Argument",
+                    "Values",
+                    "Description"
+                  ],
+                  "rows": [
+                    [
+                      "`\u003ckey\u003e`",
+                      "",
+                      ""
+                    ],
+                    [
+                      "`\u003cvalue\u003e`",
+                      "",
+                      ""
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "level": 3,
+              "heading": "Subcommands",
+              "blocks": [
+                {
+                  "kind": "table",
+                  "header": [
+                    "Command",
+                    "Description"
+                  ],
+                  "rows": [
+                    [
+                      "[`edit`](#repo-config-edit)",
+                      "Open the configuration in an editor"
+                    ]
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "level": 2,
+          "heading": "`repo config edit`",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "Open the configuration in an editor"
+            },
+            {
+              "kind": "paragraph",
+              "text": "Interactive: this command prompts for input."
+            },
+            {
+              "kind": "code",
+              "text": "repo config edit [options]"
+            }
+          ],
+          "sections": [
+            {
+              "level": 3,
+              "heading": "Inherited options",
+              "blocks": [
+                {
+                  "kind": "table",
+                  "header": [
+                    "Option",
+                    "Value",
+                    "Description"
+                  ],
+                  "rows": [
+                    [
+                      "`--verbose`, `-v`",
+                      "",
+                      "Print more"
+                    ],
+                    [
+                      "`--config`",
+                      "`\u003cfile\u003e`",
+                      "Configuration file"
+                    ]
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "level": 2,
+          "heading": "`repo sync`",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "Synchronise with all remotes"
+            },
+            {
+              "kind": "code",
+              "text": "repo sync [options]"
+            }
+          ],
+          "sections": [
+            {
+              "level": 3,
+              "heading": "Options",
+              "blocks": [
+                {
+                  "kind": "table",
+                  "header": [
+                    "Option",
+                    "Value",
+                    "Description"
+                  ],
+                  "rows": [
+                    [
+                      "`--dry-run`",
+                      "",
+                      "Show what would change"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "level": 3,
+              "heading": "Inherited options",
+              "blocks": [
+                {
+                  "kind": "table",
+                  "header": [
+                    "Option",
+                    "Value",
+                    "Description"
+                  ],
+                  "rows": [
+                    [
+                      "`--verbose`, `-v`",
+                      "",
+                      "Print more"
+                    ],
+                    [
+                      "`--config`",
+                      "`\u003cfile\u003e`",
+                      "Configuration file"
+                    ]
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

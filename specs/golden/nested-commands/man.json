@@ -1,0 +1,363 @@
+{
+  "header": [
+    "REPO",
+    "1",
+    "",
+    "repo 2.0.0",
+    "Repo"
+  ],
+  "sections": [
+    {
+      "name": "NAME",
+      "blocks": [
+        {
+          "kind": "paragraph",
+          "text": "repo - A fictional repository tool with commands nested four levels deep"
+        }
+      ]
+    },
+    {
+      "name": "SYNOPSIS",
+      "blocks": [
+        {
+          "kind": "paragraph",
+          "text": "repo [options] \u003ccommand\u003e"
+        }
+      ]
+    },
+    {
+      "name": "OPTIONS",
+      "blocks": [
+        {
+          "kind": "entry",
+          "text": "--verbose, -v",
+          "body": "Print more"
+        },
+        {
+          "kind": "entry",
+          "text": "--config \u003cfile\u003e",
+          "body": "Configuration file"
+        },
+        {
+          "kind": "entry",
+          "text": "--color",
+          "body": "Only for the root command"
+        }
+      ]
+    },
+    {
+      "name": "COMMANDS",
+      "subsections": [
+        {
+          "name": "repo remote",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "repo remote [options] \u003ccommand\u003e"
+            },
+            {
+              "kind": "paragraph",
+              "text": "Manage remotes"
+            },
+            {
+              "kind": "paragraph",
+              "text": "Aliases: r."
+            },
+            {
+              "kind": "paragraph",
+              "text": "Options:"
+            },
+            {
+              "kind": "entry",
+              "text": "--dry-run",
+              "body": "Show what would change"
+            }
+          ]
+        },
+        {
+          "name": "repo remote add",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "repo remote add [options] \u003cname\u003e \u003curl\u003e"
+            },
+            {
+              "kind": "paragraph",
+              "text": "Add a remote"
+            },
+            {
+              "kind": "paragraph",
+              "text": "Options:"
+            },
+            {
+              "kind": "entry",
+              "text": "--fetch",
+              "body": "Fetch after adding"
+            },
+            {
+              "kind": "paragraph",
+              "text": "Arguments:"
+            },
+            {
+              "kind": "entry",
+              "text": "name",
+              "body": "Required."
+            },
+            {
+              "kind": "entry",
+              "text": "url",
+              "body": "Required."
+            }
+          ]
+        },
+        {
+          "name": "repo remote list",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "repo remote list [options] [\u003cpattern\u003e]"
+            },
+            {
+              "kind": "paragraph",
+              "text": "List remotes"
+            },
+            {
+              "kind": "paragraph",
+              "text": "Aliases: ls."
+            },
+            {
+              "kind": "paragraph",
+              "text": "Arguments:"
+            },
+            {
+              "kind": "entry",
+              "text": "pattern"
+            }
+          ]
+        },
+        {
+          "name": "repo remote set-url",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "repo remote set-url [options] \u003cname\u003e \u003curl\u003e"
+            },
+            {
+              "kind": "paragraph",
+              "text": "Change the URL of a remote"
+            },
+            {
+              "kind": "paragraph",
+              "text": "Arguments:"
+            },
+            {
+              "kind": "entry",
+              "text": "name",
+              "body": "Required."
+            },
+            {
+              "kind": "entry",
+              "text": "url",
+              "body": "Required."
+            }
+          ]
+        },
+        {
+          "name": "repo remote branch",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "repo remote branch [options] \u003ccommand\u003e"
+            },
+            {
+              "kind": "paragraph",
+              "text": "Manage the branches of a remote"
+            },
+            {
+              "kind": "paragraph",
+              "text": "Options:"
+            },
+            {
+              "kind": "entry",
+              "text": "--dry-run",
+              "body": "Show what would change"
+            }
+          ]
+        },
+        {
+          "name": "repo remote branch list",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "repo remote branch list [options] \u003cremote\u003e"
+            },
+            {
+              "kind": "paragraph",
+              "text": "List the branches of a remote"
+            },
+            {
+              "kind": "paragraph",
+              "text": "Arguments:"
+            },
+            {
+              "kind": "entry",
+              "text": "remote",
+              "body": "Required."
+            }
+          ]
+        },
+        {
+          "name": "repo branch",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "repo branch [options] \u003ccommand\u003e"
+            },
+            {
+              "kind": "paragraph",
+              "text": "Manage local branches"
+            }
+          ]
+        },
+        {
+          "name": "repo branch list",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "repo branch list [options]"
+            },
+            {
+              "kind": "paragraph",
+              "text": "List local branches"
+            }
+          ]
+        },
+        {
+          "name": "repo branch create",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "repo branch create [options] \u003cname\u003e"
+            },
+            {
+              "kind": "paragraph",
+              "text": "Create a branch"
+            },
+            {
+              "kind": "paragraph",
+              "text": "Arguments:"
+            },
+            {
+              "kind": "entry",
+              "text": "name",
+              "body": "Required."
+            }
+          ]
+        },
+        {
+          "name": "repo branch delete",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "repo branch delete [options] \u003cname\u003e..."
+            },
+            {
+              "kind": "paragraph",
+              "text": "Delete branches"
+            },
+            {
+              "kind": "paragraph",
+              "text": "Aliases: rm."
+            },
+            {
+              "kind": "paragraph",
+              "text": "Options:"
+            },
+            {
+              "kind": "entry",
+              "text": "--force, -f",
+              "body": "Delete even if unmerged"
+            },
+            {
+              "kind": "paragraph",
+              "text": "Arguments:"
+            },
+            {
+              "kind": "entry",
+              "text": "name...",
+              "body": "Required."
+            }
+          ]
+        },
+        {
+          "name": "repo config",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "repo config [options] [\u003ccommand\u003e] [\u003ckey\u003e] [\u003cvalue\u003e]"
+            },
+            {
+              "kind": "paragraph",
+              "text": "Read or write configuration"
+            },
+            {
+              "kind": "paragraph",
+              "text": "With no key, prints the whole configuration."
+            },
+            {
+              "kind": "paragraph",
+              "text": "Arguments:"
+            },
+            {
+              "kind": "entry",
+              "text": "key"
+            },
+            {
+              "kind": "entry",
+              "text": "value"
+            }
+          ]
+        },
+        {
+          "name": "repo config edit",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "repo config edit [options]"
+            },
+            {
+              "kind": "paragraph",
+              "text": "Open the configuration in an editor"
+            },
+            {
+              "kind": "paragraph",
+              "text": "This command prompts for input."
+            }
+          ]
+        },
+        {
+          "name": "repo sync",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "repo sync [options]"
+            },
+            {
+              "kind": "paragraph",
+              "text": "Synchronise with all remotes"
+            },
+            {
+              "kind": "paragraph",
+              "text": "Options:"
+            },
+            {
+              "kind": "entry",
+              "text": "--dry-run",
+              "body": "Show what would change"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

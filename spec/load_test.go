@@ -260,3 +260,23 @@ func want(t *testing.T, ok bool, format string, args ...any) {
 		t.Errorf(format, args...)
 	}
 }
+
+func TestInheritedOptionsRedeclared(t *testing.T) {
+	m, _, err := spec.LoadFile("../specs/golden/nested-commands/spec.json", spec.Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	// repo remote branch list inherits --dry-run from both "remote branch"
+	// and "remote"; the nearer declaration replaces the farther one.
+	list := m.Root.Commands[0].Commands[3].Commands[0]
+	var got []string
+	for _, o := range list.InheritedOptions() {
+		got = append(got, o.Name)
+	}
+	if want := []string{"--dry-run", "--verbose", "--config"}; strings.Join(got, " ") != strings.Join(want, " ") {
+		t.Errorf("%s inherits %v, want %v", list.FullName(), got, want)
+	}
+	if got := list.InheritedOptions()[0]; got != m.Root.Commands[0].Commands[3].Options[0] {
+		t.Errorf("--dry-run should come from %q", "repo remote branch")
+	}
+}

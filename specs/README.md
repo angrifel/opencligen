@@ -9,7 +9,7 @@ these files win: fix the code, or change the spec deliberately.
 | [opencligen.json](opencligen.json) | opencligen's own command line (OpenCLI 0.1): commands, flags, defaults, exit codes. The CLI code is generated from it. |
 | [cli.md](cli.md), [opencligen.1](opencligen.1) | Reference documentation of the command line, generated from `opencligen.json`. Do not edit; run `make generate`. |
 | [extensions.md](extensions.md) | The `x-` metadata opencligen understands (types, defaults, ranges, command metadata), its strictness rules and urfave/cli limitations. |
-| [golden/](golden/) | Golden cases: input descriptions with the expected command structure of the generated Go code and the exact expected docs. See [golden/README.md](golden/README.md). |
+| [golden/](golden/) | Golden cases: input descriptions with the expected structure of every output (generated Go command tree, Markdown outline, man page outline). See [golden/README.md](golden/README.md). |
 
 Two related inputs live elsewhere, because they are not opencligen's own
 specification:

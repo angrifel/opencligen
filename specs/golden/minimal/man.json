@@ -1,0 +1,29 @@
+{
+  "header": [
+    "HELLO",
+    "1",
+    "",
+    "hello 1.0.0",
+    "Hello"
+  ],
+  "sections": [
+    {
+      "name": "NAME",
+      "blocks": [
+        {
+          "kind": "paragraph",
+          "text": "hello"
+        }
+      ]
+    },
+    {
+      "name": "SYNOPSIS",
+      "blocks": [
+        {
+          "kind": "paragraph",
+          "text": "hello"
+        }
+      ]
+    }
+  ]
+}

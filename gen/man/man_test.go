@@ -11,19 +11,6 @@ import (
 	"github.com/angrifel/opencligen/spec"
 )
 
-// TestGolden renders every case in specs/golden.
-func TestGolden(t *testing.T) {
-	for _, c := range golden.Cases(t, "../..") {
-		t.Run(c.Name, func(t *testing.T) {
-			m, _, err := spec.LoadFile(c.Spec, spec.Options{})
-			if err != nil {
-				t.Fatal(err)
-			}
-			golden.Assert(t, "../..", c.Name+"/man.1.golden", man.Generate(m, man.Options{}))
-		})
-	}
-}
-
 // TestGroff renders pages with groff, when installed, and fails on warnings.
 func TestGroff(t *testing.T) {
 	groff, err := exec.LookPath("groff")

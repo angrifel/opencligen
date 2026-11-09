@@ -152,12 +152,19 @@ func (c *Command) Runnable() bool {
 }
 
 // InheritedOptions returns the recursive options of c's ancestors, nearest
-// ancestor first.
+// ancestor first. An option redeclared with the same names by c or by a
+// nearer ancestor replaces the farther one, which is then left out.
 func (c *Command) InheritedOptions() []*Option {
+	seen := map[string]bool{}
+	key := func(o *Option) string { return strings.Join(o.Names, "\x00") }
+	for _, o := range c.Options {
+		seen[key(o)] = true
+	}
 	var opts []*Option
 	for p := c.Parent; p != nil; p = p.Parent {
 		for _, o := range p.Options {
-			if o.Recursive {
+			if o.Recursive && !seen[key(o)] {
+				seen[key(o)] = true
 				opts = append(opts, o)
 			}
 		}

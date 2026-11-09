@@ -1,0 +1,215 @@
+{
+  "header": [
+    "KITCHEN",
+    "1",
+    "",
+    "kitchen 1.2.3",
+    "Kitchen"
+  ],
+  "sections": [
+    {
+      "name": "NAME",
+      "blocks": [
+        {
+          "kind": "paragraph",
+          "text": "kitchen - Exercises every feature opencligen supports"
+        }
+      ]
+    },
+    {
+      "name": "SYNOPSIS",
+      "blocks": [
+        {
+          "kind": "paragraph",
+          "text": "kitchen [options] \u003ccommand\u003e"
+        }
+      ]
+    },
+    {
+      "name": "DESCRIPTION",
+      "blocks": [
+        {
+          "kind": "paragraph",
+          "text": "A test CLI."
+        },
+        {
+          "kind": "paragraph",
+          "text": "It covers types, defaults, ranges, positional arguments and metadata."
+        }
+      ]
+    },
+    {
+      "name": "OPTIONS",
+      "blocks": [
+        {
+          "kind": "entry",
+          "text": "--verbose, -v",
+          "body": "Print more"
+        },
+        {
+          "kind": "entry",
+          "text": "--help, -h",
+          "body": "Show help"
+        },
+        {
+          "kind": "entry",
+          "text": "--version",
+          "body": "Show the version"
+        }
+      ]
+    },
+    {
+      "name": "COMMANDS",
+      "subsections": [
+        {
+          "name": "kitchen cook",
+          "blocks": [
+            {
+              "kind": "literal",
+              "text": "kitchen cook [options] \u003cdish\u003e [\u003cservings\u003e]"
+            },
+            {
+              "kind": "paragraph",
+              "text": "Cook a dish"
+            },
+            {
+              "kind": "paragraph",
+              "text": "Cooks the given dish with the given options."
+            },
+            {
+              "kind": "paragraph",
+              "text": "Aliases: c."
+            },
+            {
+              "kind": "paragraph",
+              "text": "Options:"
+            },
+            {
+              "kind": "entry",
+              "text": "--heat \u003clevel\u003e",
+              "body": "Heat level (int; 1..9; default: 5)"
+            },
+            {
+              "kind": "entry",
+              "text": "--timer \u003cduration\u003e",
+              "body": "(duration; default: 1m30s)"
+            },
+            {
+              "kind": "entry",
+              "text": "--style \u003cstyle\u003e",
+              "body": "(one of: plain, fancy; default: plain)"
+            },
+            {
+              "kind": "entry",
+              "text": "--weights, -w \u003ckg\u003e...",
+              "body": "(float; \u003e= 0; default: 0.5, 2)"
+            },
+            {
+              "kind": "entry",
+              "text": "--salt \u003cbool\u003e",
+              "body": "(boolean; default: true)"
+            },
+            {
+              "kind": "entry",
+              "text": "--batch \u003cid\u003e",
+              "body": "Required. (uint)"
+            },
+            {
+              "kind": "paragraph",
+              "text": "Arguments:"
+            },
+            {
+              "kind": "entry",
+              "text": "dish",
+              "body": "Required. (one of: pasta, soup, salad)"
+            },
+            {
+              "kind": "entry",
+              "text": "servings",
+              "body": "How many people (int; 1..12)"
+            },
+            {
+              "kind": "paragraph",
+              "text": "Examples:"
+            },
+            {
+              "kind": "literal",
+              "text": "kitchen cook pasta 2\nkitchen cook --heat 7 soup",
+              "indented": true
+            },
+            {
+              "kind": "paragraph",
+              "text": "Exit status:"
+            },
+            {
+              "kind": "entry",
+              "text": "0",
+              "body": "Served"
+            },
+            {
+              "kind": "entry",
+              "text": "3",
+              "body": "Burnt"
+            }
+          ]
+        },
+        {
+          "name": "kitchen pantry",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "kitchen pantry [options] [\u003ccommand\u003e] [\u003cshelf\u003e...]"
+            },
+            {
+              "kind": "paragraph",
+              "text": "Manage the pantry"
+            },
+            {
+              "kind": "paragraph",
+              "text": "Arguments:"
+            },
+            {
+              "kind": "entry",
+              "text": "shelf..."
+            }
+          ]
+        },
+        {
+          "name": "kitchen pantry add",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "kitchen pantry add [options] \u003citem\u003e..."
+            },
+            {
+              "kind": "paragraph",
+              "text": "Add items"
+            },
+            {
+              "kind": "paragraph",
+              "text": "This command prompts for input."
+            },
+            {
+              "kind": "paragraph",
+              "text": "Arguments:"
+            },
+            {
+              "kind": "entry",
+              "text": "item...",
+              "body": "Required."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "SEE ALSO",
+      "blocks": [
+        {
+          "kind": "paragraph",
+          "text": "Documentation: https://example.com/docs\nContact: Kitchen team, team@example.com, https://example.com\nLicense: MIT License"
+        }
+      ]
+    }
+  ]
+}

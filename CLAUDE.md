@@ -19,7 +19,7 @@ specs disagree, the specs win. User-facing overview: README.md.
   directly, so it works even when the committed generated code is broken.
 - `make test`: vet, gofmt check, all tests (includes building generated code).
 - `make update-golden`: accept intended changes to generator output; review the
-  diff of specs/golden (structure.json and .golden files) before committing.
+  diff of the .json files in specs/golden before committing.
 - `make update-upstream`: refresh schema/ and testdata/upstream/ from
   OPENCLI_REF in the Makefile.
 
@@ -38,9 +38,9 @@ specs disagree, the specs win. User-facing overview: README.md.
 - `cmd/opencligen`: the CLI. `internal/app/app.gen.go` is generated from
   `specs/opencligen.json`; `main.go` implements its `Handlers`.
 - `specs/`: all specifications and docs (see # Specs). `specs/golden/<case>/`
-  holds a golden case: `spec.json`, `structure.json` (expected command tree
-  of the urfave output) and byte-exact Markdown and man goldens; tests
-  iterate over every case directory. specs/golden/README.md explains how
+  holds a golden case: `spec.json` plus `structure.json`, `markdown.json` and
+  `man.json`, the expected structure of each output; tests iterate over every
+  case directory. specs/golden/README.md explains how
   each is checked. The all-features case (a
   fictional CLI named kitchen) exercises every feature; extend it, or add a
   case, when adding one. Name cases with plain descriptive words, never
@@ -133,7 +133,10 @@ specs disagree, the specs win. User-facing overview: README.md.
   OnUsageError so run() reports every error itself.
 - Global flags (--lenient, --allow-c-limits) are recursive root options, so
   they work before or after the command. groupOptions is false.
-- Running with no arguments prints help and exits 0 (urfave behaviour).
+- Running with no arguments prints help and exits 0 (urfave behaviour). This
+  is a user decision: exit 2 ("invalid usage", like go, curl, tar) was
+  considered and rejected in favour of what docker, gh, cargo and kubectl
+  do.
 - Exit codes: 0 ok, 1 invalid description or generation error, 2 usage.
   Handlers wrap description and output errors in invalidError; any other
   error (flags, argument counts, unknown commands) is a usage error.
@@ -153,8 +156,14 @@ specs disagree, the specs win. User-facing overview: README.md.
   changes, keep the property checks and wantHandler/wantFlagType in the test
   as an independent statement of the mapping; do not derive them from the
   generator.
-- Docs outputs (Markdown, man) are still byte-exact goldens: their text is
-  the product.
+- The docs outputs are tested the same way (user decision, options M2 and
+  R2): gen/markdown and gen/man read the output back into an outline
+  (outline_test.go, roff_test.go), check it against the description and
+  compare it with markdown.json / man.json. The roff reader rejects requests
+  and escapes it does not know, so adding one to the generator means
+  teaching the reader on purpose. No test compares generated text byte for
+  byte, except TestGeneratedFilesUpToDate, which checks that committed
+  generated files are current.
 
 - Every user-visible error message has a case in spec/load_test.go or
   gen/urfave/urfave_test.go, including its line:col where relevant.

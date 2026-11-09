@@ -1,0 +1,448 @@
+{
+  "level": 0,
+  "heading": "",
+  "sections": [
+    {
+      "level": 1,
+      "heading": "Kitchen",
+      "blocks": [
+        {
+          "kind": "paragraph",
+          "text": "Exercises every feature opencligen supports"
+        },
+        {
+          "kind": "paragraph",
+          "text": "A test CLI."
+        },
+        {
+          "kind": "paragraph",
+          "text": "It covers types, defaults, ranges, positional arguments and metadata."
+        },
+        {
+          "kind": "table",
+          "header": [
+            "",
+            ""
+          ],
+          "rows": [
+            [
+              "Version",
+              "1.2.3"
+            ],
+            [
+              "License",
+              "MIT License (MIT)"
+            ],
+            [
+              "Contact",
+              "[Kitchen team](https://example.com), [team@example.com](mailto:team@example.com)"
+            ],
+            [
+              "Documentation",
+              "[https://example.com/docs](https://example.com/docs)"
+            ]
+          ]
+        }
+      ],
+      "sections": [
+        {
+          "level": 2,
+          "heading": "Commands",
+          "blocks": [
+            {
+              "kind": "list",
+              "items": [
+                {
+                  "depth": 0,
+                  "text": "[`kitchen`](#kitchen): Exercises every feature opencligen supports"
+                },
+                {
+                  "depth": 1,
+                  "text": "[`kitchen cook`](#kitchen-cook): Cook a dish"
+                },
+                {
+                  "depth": 1,
+                  "text": "[`kitchen pantry`](#kitchen-pantry): Manage the pantry"
+                },
+                {
+                  "depth": 2,
+                  "text": "[`kitchen pantry add`](#kitchen-pantry-add): Add items"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "level": 2,
+          "heading": "`kitchen`",
+          "blocks": [
+            {
+              "kind": "code",
+              "text": "kitchen [options] \u003ccommand\u003e"
+            }
+          ],
+          "sections": [
+            {
+              "level": 3,
+              "heading": "Options",
+              "blocks": [
+                {
+                  "kind": "table",
+                  "header": [
+                    "Option",
+                    "Value",
+                    "Description"
+                  ],
+                  "rows": [
+                    [
+                      "`--verbose`, `-v`",
+                      "",
+                      "Print more"
+                    ],
+                    [
+                      "`--help`, `-h`",
+                      "",
+                      "Show help"
+                    ],
+                    [
+                      "`--version`",
+                      "",
+                      "Show the version"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "level": 3,
+              "heading": "Subcommands",
+              "blocks": [
+                {
+                  "kind": "table",
+                  "header": [
+                    "Command",
+                    "Description"
+                  ],
+                  "rows": [
+                    [
+                      "[`cook`](#kitchen-cook)",
+                      "Cook a dish"
+                    ],
+                    [
+                      "[`pantry`](#kitchen-pantry)",
+                      "Manage the pantry"
+                    ]
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "level": 2,
+          "heading": "`kitchen cook`",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "Cook a dish"
+            },
+            {
+              "kind": "paragraph",
+              "text": "Cooks the given dish with the given options."
+            },
+            {
+              "kind": "paragraph",
+              "text": "Aliases: `c`\nCategory: Meals"
+            },
+            {
+              "kind": "code",
+              "text": "kitchen cook [options] \u003cdish\u003e [\u003cservings\u003e]"
+            }
+          ],
+          "sections": [
+            {
+              "level": 3,
+              "heading": "Options",
+              "blocks": [
+                {
+                  "kind": "table",
+                  "header": [
+                    "Option",
+                    "Value",
+                    "Description"
+                  ],
+                  "rows": [
+                    [
+                      "`--heat`",
+                      "`\u003clevel\u003e` int; 1..9; default: 5",
+                      "Heat level"
+                    ],
+                    [
+                      "`--timer`",
+                      "`\u003cduration\u003e` duration; default: 1m30s",
+                      ""
+                    ],
+                    [
+                      "`--style`",
+                      "`\u003cstyle\u003e` one of: plain, fancy; default: plain",
+                      "Group: Presentation."
+                    ],
+                    [
+                      "`--weights`, `-w`",
+                      "`\u003ckg\u003e...` float; \u003e= 0; default: 0.5, 2",
+                      ""
+                    ],
+                    [
+                      "`--salt`",
+                      "`\u003cbool\u003e` boolean; default: true",
+                      ""
+                    ],
+                    [
+                      "`--batch`",
+                      "`\u003cid\u003e` uint",
+                      "Required."
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "level": 3,
+              "heading": "Inherited options",
+              "blocks": [
+                {
+                  "kind": "table",
+                  "header": [
+                    "Option",
+                    "Value",
+                    "Description"
+                  ],
+                  "rows": [
+                    [
+                      "`--verbose`, `-v`",
+                      "",
+                      "Print more"
+                    ],
+                    [
+                      "`--help`, `-h`",
+                      "",
+                      "Show help"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "level": 3,
+              "heading": "Arguments",
+              "blocks": [
+                {
+                  "kind": "table",
+                  "header": [
+                    "Argument",
+                    "Values",
+                    "Description"
+                  ],
+                  "rows": [
+                    [
+                      "`\u003cdish\u003e`",
+                      "one of: pasta, soup, salad",
+                      "Required."
+                    ],
+                    [
+                      "`\u003cservings\u003e`",
+                      "int; 1..12",
+                      "How many people"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "level": 3,
+              "heading": "Examples",
+              "blocks": [
+                {
+                  "kind": "code",
+                  "text": "kitchen cook pasta 2\nkitchen cook --heat 7 soup"
+                }
+              ]
+            },
+            {
+              "level": 3,
+              "heading": "Exit codes",
+              "blocks": [
+                {
+                  "kind": "table",
+                  "header": [
+                    "Code",
+                    "Description"
+                  ],
+                  "rows": [
+                    [
+                      "0",
+                      "Served"
+                    ],
+                    [
+                      "3",
+                      "Burnt"
+                    ]
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "level": 2,
+          "heading": "`kitchen pantry`",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "Manage the pantry"
+            },
+            {
+              "kind": "code",
+              "text": "kitchen pantry [options] [\u003ccommand\u003e] [\u003cshelf\u003e...]"
+            }
+          ],
+          "sections": [
+            {
+              "level": 3,
+              "heading": "Inherited options",
+              "blocks": [
+                {
+                  "kind": "table",
+                  "header": [
+                    "Option",
+                    "Value",
+                    "Description"
+                  ],
+                  "rows": [
+                    [
+                      "`--verbose`, `-v`",
+                      "",
+                      "Print more"
+                    ],
+                    [
+                      "`--help`, `-h`",
+                      "",
+                      "Show help"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "level": 3,
+              "heading": "Arguments",
+              "blocks": [
+                {
+                  "kind": "table",
+                  "header": [
+                    "Argument",
+                    "Values",
+                    "Description"
+                  ],
+                  "rows": [
+                    [
+                      "`\u003cshelf\u003e...`",
+                      "",
+                      ""
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "level": 3,
+              "heading": "Subcommands",
+              "blocks": [
+                {
+                  "kind": "table",
+                  "header": [
+                    "Command",
+                    "Description"
+                  ],
+                  "rows": [
+                    [
+                      "[`add`](#kitchen-pantry-add)",
+                      "Add items"
+                    ]
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "level": 2,
+          "heading": "`kitchen pantry add`",
+          "blocks": [
+            {
+              "kind": "paragraph",
+              "text": "Add items"
+            },
+            {
+              "kind": "paragraph",
+              "text": "Interactive: this command prompts for input."
+            },
+            {
+              "kind": "code",
+              "text": "kitchen pantry add [options] \u003citem\u003e..."
+            }
+          ],
+          "sections": [
+            {
+              "level": 3,
+              "heading": "Inherited options",
+              "blocks": [
+                {
+                  "kind": "table",
+                  "header": [
+                    "Option",
+                    "Value",
+                    "Description"
+                  ],
+                  "rows": [
+                    [
+                      "`--verbose`, `-v`",
+                      "",
+                      "Print more"
+                    ],
+                    [
+                      "`--help`, `-h`",
+                      "",
+                      "Show help"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "level": 3,
+              "heading": "Arguments",
+              "blocks": [
+                {
+                  "kind": "table",
+                  "header": [
+                    "Argument",
+                    "Values",
+                    "Description"
+                  ],
+                  "rows": [
+                    [
+                      "`\u003citem\u003e...`",
+                      "",
+                      "Required."
+                    ]
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

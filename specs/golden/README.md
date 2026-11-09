@@ -3,17 +3,23 @@
 Each directory here is one golden case: an input description and what
 opencligen must produce from it. The cases are part of the specification.
 
-| File | Content | Compared |
-|---|---|---|
-| `spec.json` | The input OpenCLI description. | |
-| `structure.json` | The command tree that the generated urfave/cli code builds (see below). | as data |
-| `markdown.md.golden` | `opencligen markdown spec.json` | byte for byte |
-| `man.1.golden` | `opencligen man spec.json` | byte for byte |
+| File | Content |
+|---|---|
+| `spec.json` | The input OpenCLI description. |
+| `structure.json` | The command tree that the generated urfave/cli code builds. |
+| `markdown.json` | The outline of `opencligen markdown spec.json`: sections, paragraphs, code blocks, tables and lists. |
+| `man.json` | The outline of `opencligen man spec.json`: the `.TH` header, sections, subsections, paragraphs, literal blocks and tagged entries. |
 
-## Generated Go code: structure, not text
+No output is compared as text. Each test reads the output back into
+structure, checks it against `spec.json`, and compares the structure with the
+expected `.json` file as data. Layout changes (reordered Go functions,
+spacing, table padding, which roff requests are used) never fail a test;
+changes of content or structure do, and show up in review as a diff of the
+`.json` files.
 
-The Go output is not compared as text, so reordering or reformatting the
-generated source never fails a test. Instead, `gen/urfave/structure_test.go`
+## Generated Go code
+
+ `gen/urfave/structure_test.go`
 compiles the generated code, walks the urfave/cli command tree that `New`
 returns, and runs command lines against it. It checks three things:
 
@@ -37,6 +43,36 @@ returns, and runs command lines against it. It checks three things:
 
 Checks 1 and 2 also run on the upstream examples in `testdata/upstream`,
 whose git description has 251 commands.
+
+## Markdown
+
+`gen/markdown/structure_test.go` reads the document back with a small
+Markdown reader (`outline_test.go`) and checks, against `spec.json`:
+
+- the title, the summary, and a command index that lists every visible
+  command in order, at its depth, linking to its section;
+- exactly one section per visible command and none for hidden ones, each with
+  the summary, aliases, category and the usage block (`x-usage`, or the
+  generated synopsis);
+- the Options, Inherited options, Arguments, Subcommands and Exit codes
+  tables: one row per visible item, in order, with names, value placeholder,
+  type, accepted values, range, default, "Required.", group and description;
+- examples;
+- that every internal link resolves to a heading.
+
+## Man page
+
+`gen/man/structure_test.go` reads the page back with a roff reader
+(`roff_test.go`) and checks the `.TH` header, which sections appear and in
+what order, NAME, SYNOPSIS, DESCRIPTION, the option and argument entries of
+the root, one COMMANDS subsection per visible command in order (synopsis,
+description, aliases, option, argument, example and exit status entries),
+and EXIT STATUS. The reader knows only the requests and escapes the generator
+uses; anything else fails the test, so supporting a new one is a deliberate
+change. `TestGroff` additionally renders every page with `groff -ww` when it
+is installed and fails on warnings.
+
+Both document checks also run on the upstream git and curl examples.
 
 ## Cases
 
@@ -63,6 +99,5 @@ that must be a valid Go identifier.
 - To add a case, create `<case>/spec.json` and run `make update-golden`; the
   tests pick up every directory automatically.
 - After an intended change to a generator, run `make update-golden` and
-  review the diff of `structure.json` and the `.golden` files: it is the
-  user-visible change.
-- Never edit `structure.json` or `.golden` files by hand.
+  review the diff of the `.json` files: it is the user-visible change.
+- Never edit the expected `.json` files by hand.
