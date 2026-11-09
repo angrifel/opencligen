@@ -1,0 +1,123 @@
+{
+	"$schema": "../schema/0.1/schema.json",
+	"opencli": "0.1",
+	"info": {
+		"title": "opencligen",
+		"summary": "Validate OpenCLI descriptions and generate code and docs from them",
+		"description": "opencligen validates OpenCLI descriptions (https://opencli.org/) against the OpenCLI schema and its own rules, and generates a urfave/cli v3 command tree in Go, a Markdown reference or a man page from them.\n\nThe x- metadata it understands is described in docs/extensions.md.",
+		"version": "devel",
+		"contact": { "url": "https://github.com/angrifel/opencligen" }
+	},
+	"conventions": { "groupOptions": false, "optionSeparator": " " },
+	"command": {
+		"name": "opencligen",
+		"options": [
+			{
+				"name": "--lenient",
+				"recursive": true,
+				"description": "Report problems that can be worked around as warnings instead of errors: x- metadata that cannot be typed, and features the output cannot express."
+			},
+			{
+				"name": "--allow-c-limits",
+				"recursive": true,
+				"description": "Accept C limit constants such as INT_MAX, -FLT_MAX or I64_MIN in x-range and x-default."
+			}
+		],
+		"exitCodes": [
+			{ "code": 0, "description": "Success" },
+			{ "code": 1, "description": "The description has errors, or the output cannot be generated" },
+			{ "code": 2, "description": "Invalid usage" }
+		],
+		"commands": [
+			{
+				"name": "validate",
+				"description": "Check a description against the OpenCLI schema and opencligen's rules",
+				"examples": ["opencligen validate cli.json", "opencligen validate --lenient --allow-c-limits ffmpeg.json"],
+				"arguments": [
+					{ "name": "spec", "required": true, "description": "The OpenCLI description, a JSON file" }
+				]
+			},
+			{
+				"name": "urfave",
+				"description": "Generate a github.com/urfave/cli/v3 command tree in Go\n\nThe generated file declares a Handlers interface with one method per runnable command and a New function that builds the command tree wired to it.",
+				"examples": ["opencligen urfave -o internal/cli/cli.gen.go --package cli cli.json"],
+				"options": [
+					{
+						"name": "--output",
+						"aliases": ["-o"],
+						"description": "Output file, or - for standard output",
+						"arguments": [{ "name": "file", "required": true }],
+						"metadata": [{ "name": "x-default", "value": "-" }]
+					},
+					{
+						"name": "--package",
+						"description": "Package name of the generated file",
+						"arguments": [{ "name": "name", "required": true }],
+						"metadata": [{ "name": "x-default", "value": "cli" }]
+					},
+					{
+						"name": "--source",
+						"description": "Document name mentioned in the generated header; defaults to the spec path",
+						"arguments": [{ "name": "name", "required": true }]
+					}
+				],
+				"arguments": [
+					{ "name": "spec", "required": true, "description": "The OpenCLI description, a JSON file" }
+				]
+			},
+			{
+				"name": "markdown",
+				"description": "Generate a Markdown reference",
+				"examples": ["opencligen markdown -o docs/cli.md cli.json"],
+				"options": [
+					{
+						"name": "--output",
+						"aliases": ["-o"],
+						"description": "Output file, or - for standard output",
+						"arguments": [{ "name": "file", "required": true }],
+						"metadata": [{ "name": "x-default", "value": "-" }]
+					},
+					{
+						"name": "--hidden",
+						"description": "Document hidden commands, options and arguments"
+					}
+				],
+				"arguments": [
+					{ "name": "spec", "required": true, "description": "The OpenCLI description, a JSON file" }
+				]
+			},
+			{
+				"name": "man",
+				"description": "Generate a roff man page",
+				"examples": ["opencligen man -o docs/mytool.1 cli.json", "man -l docs/mytool.1"],
+				"options": [
+					{
+						"name": "--output",
+						"aliases": ["-o"],
+						"description": "Output file, or - for standard output",
+						"arguments": [{ "name": "file", "required": true }],
+						"metadata": [{ "name": "x-default", "value": "-" }]
+					},
+					{
+						"name": "--section",
+						"description": "Manual section",
+						"arguments": [{ "name": "n", "required": true }],
+						"metadata": [{ "name": "x-default", "value": "1" }]
+					},
+					{
+						"name": "--date",
+						"description": "Date shown in the page footer; empty by default for reproducible output",
+						"arguments": [{ "name": "date", "required": true }]
+					},
+					{
+						"name": "--hidden",
+						"description": "Document hidden commands, options and arguments"
+					}
+				],
+				"arguments": [
+					{ "name": "spec", "required": true, "description": "The OpenCLI description, a JSON file" }
+				]
+			}
+		]
+	}
+}

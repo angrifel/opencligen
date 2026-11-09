@@ -6,6 +6,8 @@ docs/extensions.md; keep it in sync with spec/value.go and spec/build.go.
 
 # Commands
 
+- `make generate`: regenerate opencligen's own CLI code and docs from
+  specs/opencligen.json. Run it after changing the spec or any generator.
 - `make test`: vet, gofmt check, all tests (includes building generated code).
 - `make update-golden`: accept intended changes to generator output; review the
   diff of testdata/golden before committing.
@@ -21,7 +23,10 @@ docs/extensions.md; keep it in sync with spec/value.go and spec/build.go.
 - `gen/urfave`, `gen/markdown`, `gen/man`: outputs; `gen/docs` has shared
   helpers for the documentation outputs.
 - `clirt/`: runtime package imported by generated urfave code.
-- `cmd/opencligen`: the CLI.
+- `cmd/opencligen`: the CLI. `internal/app/app.gen.go` is generated from
+  `specs/opencligen.json`; `main.go` implements its `Handlers`.
+- `specs/opencligen.json`: the OpenCLI description of opencligen itself.
+  `docs/cli.md` and `docs/opencligen.1` are generated from it.
 - `testdata/kitchen.json`: test description exercising every feature; extend it
   when adding one. `testdata/upstream/`: upstream examples used as a corpus.
 
@@ -44,8 +49,8 @@ docs/extensions.md; keep it in sync with spec/value.go and spec/build.go.
   fallback (untypeable x- metadata becomes untyped; urfave limitations get an
   approximation) and always reports a warning.
 - C limit constants (INT_MAX, -FLT_MAX, I64_MIN, ...) are accepted only with
-  `AllowCLimits` / `-allow-c-limits`. The user decided this must be opt-in,
-  separate from `-lenient`. Plain numeric strings ("12", "2.14748e+09") are
+  `AllowCLimits` / `--allow-c-limits`. The user decided this must be opt-in,
+  separate from `--lenient`. Plain numeric strings ("12", "2.14748e+09") are
   accepted by default.
 - Unknown metadata names are ignored, so documents written for other tools
   still load.
@@ -88,9 +93,24 @@ docs/extensions.md; keep it in sync with spec/value.go and spec/build.go.
 - Hidden commands, options and arguments are left out unless `-hidden`.
 - The man page has no date unless `-date` is given, so output is reproducible.
 
-## CLI
+## CLI (dogfooded)
 
+- The CLI is built with opencligen's own urfave output: change the command
+  line by editing specs/opencligen.json and running `make generate`, never by
+  editing app.gen.go. Behaviour goes in main.go's handlers.
+- Generated files are committed. That avoids a bootstrap problem: the tool
+  always builds from the committed code, even while a generator change is
+  broken. TestGeneratedFilesUpToDate fails when they are stale.
+- main.go adds what the spec cannot say: the version comes from build info
+  (info.version in the spec is a placeholder), urfave/cli must never call
+  os.Exit (no-op ExitErrHandler), and usage errors are routed through
+  OnUsageError so run() reports every error itself.
+- Global flags (--lenient, --allow-c-limits) are recursive root options, so
+  they work before or after the command. groupOptions is false.
+- Running with no arguments prints help and exits 0 (urfave behaviour).
 - Exit codes: 0 ok, 1 invalid description or generation error, 2 usage.
+  Handlers wrap description and output errors in invalidError; any other
+  error (flags, argument counts, unknown commands) is a usage error.
 - An output file whose content would not change is not rewritten, so make
   sees it as up to date.
 

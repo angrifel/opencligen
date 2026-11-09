@@ -291,7 +291,7 @@ func (v Value) parseNumber(raw json.RawMessage, opts Options) (any, error) {
 	name, neg := strings.CutPrefix(text, "-")
 	if c, ok := cLimits[name]; ok {
 		if !opts.AllowCLimits {
-			return nil, fmt.Errorf("%q is a C limit constant; enable AllowCLimits (-allow-c-limits) to accept it", text)
+			return nil, fmt.Errorf("%q is a C limit constant; enable AllowCLimits (--allow-c-limits) to accept it", text)
 		}
 		resolved = c
 		if neg {

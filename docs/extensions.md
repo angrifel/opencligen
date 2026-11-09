@@ -7,7 +7,7 @@ OpenCLI examples use for extensions. Other metadata is ignored, so a
 document stays valid OpenCLI and other tools can read it unchanged.
 
 Unless noted otherwise, a problem in an extension is an error. With
-`-lenient` (`spec.Options.Lenient`), problems in `x-type`, `x-default` and
+`--lenient` (`spec.Options.Lenient`), problems in `x-type`, `x-default` and
 `x-range` become warnings and the option or argument is treated as untyped
 instead.
 
@@ -77,7 +77,7 @@ defaults.
 
 #### C limit constants
 
-With `-allow-c-limits` (`spec.Options.AllowCLimits`), bounds and numeric
+With `--allow-c-limits` (`spec.Options.AllowCLimits`), bounds and numeric
 defaults may also be C limit constants, optionally negated, as in the
 upstream ffmpeg example:
 
@@ -114,14 +114,14 @@ root command is `Root`.
 opencligen gives `x-type`, `x-default` and `x-range` the meaning above.
 Descriptions written for other tools may use the same names differently; the
 upstream ffmpeg example, for instance, uses types such as `flags` or
-`dictionary` and named defaults such as `"auto"`. Use `-lenient` to load such
+`dictionary` and named defaults such as `"auto"`. Use `--lenient` to load such
 documents: those options become untyped, with a warning for each. Metadata
 with other names, such as dotnet's `x-value-type`, is ignored.
 
 ## urfave/cli limitations
 
 Some OpenCLI features cannot be expressed with urfave/cli v3. The urfave
-output reports them as errors, or as warnings with `-lenient`, in which case
+output reports them as errors, or as warnings with `--lenient`, in which case
 it generates the closest approximation:
 
 | Feature | Lenient approximation |

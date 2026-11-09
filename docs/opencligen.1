@@ -1,0 +1,139 @@
+.TH "OPENCLIGEN" "1" "" "opencligen devel" "opencligen"
+.SH NAME
+opencligen \- Validate OpenCLI descriptions and generate code and docs from them
+.SH SYNOPSIS
+.B opencligen
+[options] <command>
+.SH DESCRIPTION
+opencligen validates OpenCLI descriptions (https://opencli.org/) against the OpenCLI schema and its own rules, and generates a urfave/cli v3 command tree in Go, a Markdown reference or a man page from them.
+.PP
+The x- metadata it understands is described in docs/extensions.md.
+.SH OPTIONS
+.TP
+\fB\-\-lenient\fR
+Report problems that can be worked around as warnings instead of errors: x- metadata that cannot be typed, and features the output cannot express.
+.TP
+\fB\-\-allow\-c\-limits\fR
+Accept C limit constants such as INT_MAX, -FLT_MAX or I64_MIN in x-range and x-default.
+.SH COMMANDS
+.SS "opencligen validate"
+.B opencligen validate
+[options] <spec>
+.PP
+Check a description against the OpenCLI schema and opencligen's rules
+.PP
+\fBArguments:\fR
+.TP
+\fIspec\fR
+Required. The OpenCLI description, a JSON file
+.PP
+\fBExamples:\fR
+.PP
+.RS 4
+.nf
+opencligen validate cli.json
+opencligen validate --lenient --allow-c-limits ffmpeg.json
+.fi
+.RE
+.SS "opencligen urfave"
+.B opencligen urfave
+[options] <spec>
+.PP
+Generate a github.com/urfave/cli/v3 command tree in Go
+.PP
+The generated file declares a Handlers interface with one method per runnable command and a New function that builds the command tree wired to it.
+.PP
+\fBOptions:\fR
+.TP
+\fB\-\-output\fR, \fB\-o\fR \fI<file>\fR
+Output file, or - for standard output (default: -)
+.TP
+\fB\-\-package\fR \fI<name>\fR
+Package name of the generated file (default: cli)
+.TP
+\fB\-\-source\fR \fI<name>\fR
+Document name mentioned in the generated header; defaults to the spec path
+.PP
+\fBArguments:\fR
+.TP
+\fIspec\fR
+Required. The OpenCLI description, a JSON file
+.PP
+\fBExamples:\fR
+.PP
+.RS 4
+.nf
+opencligen urfave -o internal/cli/cli.gen.go --package cli cli.json
+.fi
+.RE
+.SS "opencligen markdown"
+.B opencligen markdown
+[options] <spec>
+.PP
+Generate a Markdown reference
+.PP
+\fBOptions:\fR
+.TP
+\fB\-\-output\fR, \fB\-o\fR \fI<file>\fR
+Output file, or - for standard output (default: -)
+.TP
+\fB\-\-hidden\fR
+Document hidden commands, options and arguments
+.PP
+\fBArguments:\fR
+.TP
+\fIspec\fR
+Required. The OpenCLI description, a JSON file
+.PP
+\fBExamples:\fR
+.PP
+.RS 4
+.nf
+opencligen markdown -o docs/cli.md cli.json
+.fi
+.RE
+.SS "opencligen man"
+.B opencligen man
+[options] <spec>
+.PP
+Generate a roff man page
+.PP
+\fBOptions:\fR
+.TP
+\fB\-\-output\fR, \fB\-o\fR \fI<file>\fR
+Output file, or - for standard output (default: -)
+.TP
+\fB\-\-section\fR \fI<n>\fR
+Manual section (default: 1)
+.TP
+\fB\-\-date\fR \fI<date>\fR
+Date shown in the page footer; empty by default for reproducible output
+.TP
+\fB\-\-hidden\fR
+Document hidden commands, options and arguments
+.PP
+\fBArguments:\fR
+.TP
+\fIspec\fR
+Required. The OpenCLI description, a JSON file
+.PP
+\fBExamples:\fR
+.PP
+.RS 4
+.nf
+opencligen man -o docs/mytool.1 cli.json
+man -l docs/mytool.1
+.fi
+.RE
+.SH EXIT STATUS
+.TP
+\fB0\fR
+Success
+.TP
+\fB1\fR
+The description has errors, or the output cannot be generated
+.TP
+\fB2\fR
+Invalid usage
+.SH SEE ALSO
+Contact: https://github.com/angrifel/opencligen
