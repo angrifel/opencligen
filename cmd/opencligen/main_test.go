@@ -8,10 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/angrifel/opencligen/gen/man"
-	"github.com/angrifel/opencligen/gen/markdown"
-	"github.com/angrifel/opencligen/gen/urfave"
-	"github.com/angrifel/opencligen/spec"
+	"github.com/angrifel/opencligen/internal/selfgen"
 )
 
 const kitchen = "../../testdata/kitchen.json"
@@ -125,27 +122,18 @@ func TestUnchangedOutputIsNotRewritten(t *testing.T) {
 // generated from specs/opencligen.json match the spec and the current
 // generators. Run "make generate" to update them.
 func TestGeneratedFilesUpToDate(t *testing.T) {
-	const self = "specs/opencligen.json"
-	m, _, err := spec.LoadFile("../../"+self, spec.Options{})
+	files, err := selfgen.Files("../..")
 	if err != nil {
 		t.Fatal(err)
 	}
-	code, _, err := urfave.Generate(m, urfave.Options{Package: "app", Source: self})
-	if err != nil {
-		t.Fatal(err)
-	}
-	for file, want := range map[string][]byte{
-		"internal/app/app.gen.go": code,
-		"../../docs/cli.md":       markdown.Generate(m, markdown.Options{}),
-		"../../docs/opencligen.1": man.Generate(m, man.Options{}),
-	} {
-		got, err := os.ReadFile(file)
+	for name, want := range files {
+		got, err := os.ReadFile(filepath.Join("../..", name))
 		if err != nil {
 			t.Errorf("%v; run make generate", err)
 			continue
 		}
 		if !bytes.Equal(got, want) {
-			t.Errorf("%s is out of date with %s; run make generate", file, self)
+			t.Errorf("%s is out of date with %s; run make generate", name, selfgen.Spec)
 		}
 	}
 }

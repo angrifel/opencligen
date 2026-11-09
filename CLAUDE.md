@@ -8,6 +8,8 @@ docs/extensions.md; keep it in sync with spec/value.go and spec/build.go.
 
 - `make generate`: regenerate opencligen's own CLI code and docs from
   specs/opencligen.json. Run it after changing the spec or any generator.
+  It runs ./internal/selfgen/cmd, which calls the generator packages
+  directly, so it works even when the committed generated code is broken.
 - `make test`: vet, gofmt check, all tests (includes building generated code).
 - `make update-golden`: accept intended changes to generator output; review the
   diff of testdata/golden before committing.
@@ -22,7 +24,10 @@ docs/extensions.md; keep it in sync with spec/value.go and spec/build.go.
   semantic rules live here.
 - `gen/urfave`, `gen/markdown`, `gen/man`: outputs; `gen/docs` has shared
   helpers for the documentation outputs.
-- `clirt/`: runtime package imported by generated urfave code.
+- `gen/urfave/runtime/`: helpers that the urfave output copies into every
+  generated file (see "urfave output" below).
+- `internal/selfgen/`: generates opencligen's own CLI files; shared by
+  `make generate` and TestGeneratedFilesUpToDate.
 - `cmd/opencligen`: the CLI. `internal/app/app.gen.go` is generated from
   `specs/opencligen.json`; `main.go` implements its `Handlers`.
 - `specs/opencligen.json`: the OpenCLI description of opencligen itself.
@@ -40,8 +45,14 @@ docs/extensions.md; keep it in sync with spec/value.go and spec/build.go.
   carry file:line:col like loader errors.
 - Library code takes options structs (`spec.Options`, `urfave.Options`, ...);
   no package-level state.
-- Generated urfave code imports `clirt` instead of inlining helpers. This
-  makes users depend on this module at runtime; that trade-off was accepted.
+- Generated code must not depend on opencligen (user decision): the urfave
+  output embeds its helpers. They live in gen/urfave/runtime as a real,
+  tested package; the generator go:embeds runtime.go and copies everything
+  after its import block, and the generated file's imports are taken from
+  that block plus "context". Rules for runtime.go: unexported identifiers
+  prefixed "ocli" (they share the user's package), no imports beyond the
+  standard library and urfave/cli. The e2e test builds generated code in a
+  module that requires only urfave/cli, which enforces this.
 
 ## Strictness
 
@@ -78,7 +89,7 @@ docs/extensions.md; keep it in sync with spec/value.go and spec/build.go.
 - `conventions.groupOptions` maps to `UseShortOptionHandling` on the root.
   Option separators other than " " and "=" are unsupported.
 - Boolean options that take a value ("-flag true") become `StringFlag` with
-  `clirt.Bool`, because `BoolFlag` never consumes an argument.
+  `ocliBool`, because `BoolFlag` never consumes an argument.
 - Options with more than one argument per use are unsupported (none exist in
   the upstream corpus); lenient mode makes them repeatable flags.
 - Handlers: one method per runnable command (leaves, and groups that take
@@ -98,9 +109,12 @@ docs/extensions.md; keep it in sync with spec/value.go and spec/build.go.
 - The CLI is built with opencligen's own urfave output: change the command
   line by editing specs/opencligen.json and running `make generate`, never by
   editing app.gen.go. Behaviour goes in main.go's handlers.
-- Generated files are committed. That avoids a bootstrap problem: the tool
-  always builds from the committed code, even while a generator change is
-  broken. TestGeneratedFilesUpToDate fails when they are stale.
+- Generated files are committed, so the tool builds without a generation
+  step. Regeneration must not need the tool itself: when the generated API
+  changes (e.g. removing the clirt import), the committed app.gen.go stops
+  compiling and `go run ./cmd/opencligen` cannot fix it. That is why
+  `make generate` uses internal/selfgen. TestGeneratedFilesUpToDate fails
+  when the committed files are stale.
 - main.go adds what the spec cannot say: the version comes from build info
   (info.version in the spec is a placeholder), urfave/cli must never call
   os.Exit (no-op ExitErrHandler), and usage errors are routed through

@@ -54,9 +54,9 @@ func main() {
 }
 `
 
-// TestEndToEnd generates code into a scratch module, builds it and runs the
-// kitchen CLI; it also compiles the code generated for the upstream
-// examples.
+// TestEndToEnd generates code into a scratch module that depends only on
+// urfave/cli, builds it and runs the kitchen CLI; it also compiles the code
+// generated for the upstream examples.
 func TestEndToEnd(t *testing.T) {
 	if testing.Short() {
 		t.Skip("builds Go code")
@@ -84,9 +84,9 @@ func TestEndToEnd(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	write("go.mod", "module example.com/e2e\n\ngo 1.24\n\n"+
-		"require (\n\tgithub.com/angrifel/opencligen v0.0.0\n\tgithub.com/urfave/cli/v3 v3.14.0\n)\n\n"+
-		"replace github.com/angrifel/opencligen => "+root+"\n")
+	// The scratch module requires only urfave/cli: generated code must not
+	// depend on opencligen.
+	write("go.mod", "module example.com/e2e\n\ngo 1.24\n\nrequire github.com/urfave/cli/v3 v3.14.0\n")
 	write("go.sum", string(sum))
 	write("main.go", kitchenMain)
 
@@ -99,6 +99,9 @@ func TestEndToEnd(t *testing.T) {
 		src, _, err := urfave.Generate(m, urfave.Options{Package: pkg, Lenient: opts.Lenient})
 		if err != nil {
 			t.Fatal(err)
+		}
+		if strings.Contains(string(src), "angrifel/opencligen") {
+			t.Errorf("%s: generated code refers to opencligen", pkg)
 		}
 		write(pkg+"/gen.go", string(src))
 	}
