@@ -1,12 +1,11 @@
-// Package spec loads OpenCLI documents (https://opencli.org/), validates them
-// against the OpenCLI JSON schema and opencligen's semantic rules, and
-// resolves them into a Model that generators render from.
-package spec
+// Package ast declares the resolved form of an OpenCLI description: the
+// Model that the parser builds and every generator renders from, its values
+// and types, and the diagnostics reported about it.
+package ast
 
 import (
 	"encoding/json"
 	"strings"
-	"sync"
 )
 
 // Model is a validated OpenCLI document.
@@ -16,11 +15,9 @@ type Model struct {
 	Conventions Conventions
 	Root        *Command
 
-	// The source document, for Diagnostic.
-	name    string
-	data    []byte
-	once    sync.Once
-	offsets map[string]int
+	// Source is the document the model was parsed from, used to locate
+	// diagnostics; nil for models built by hand.
+	Source *Source
 }
 
 type Info struct {

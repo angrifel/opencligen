@@ -23,8 +23,9 @@ import (
 	"github.com/angrifel/opencligen/gen/man"
 	"github.com/angrifel/opencligen/gen/markdown"
 	"github.com/angrifel/opencligen/gen/urfave"
+	"github.com/angrifel/opencligen/internal/opencli/ast"
+	"github.com/angrifel/opencligen/internal/opencli/parser"
 	"github.com/angrifel/opencligen/schema"
-	"github.com/angrifel/opencligen/spec"
 )
 
 // Exit codes, as declared in specs/opencligen.json.
@@ -53,7 +54,7 @@ func run(args []string, stdout, stderr io.Writer) int {
 		return exitOK
 	case errors.As(err, &inv):
 		fmt.Fprintln(stderr, inv.err)
-		var se *spec.Error
+		var se *ast.Error
 		if errors.As(inv.err, &se) {
 			fmt.Fprintf(stderr, "opencligen: %d error(s)\n", len(se.Diagnostics))
 		}
@@ -86,10 +87,10 @@ type handlers struct {
 }
 
 // load reads the SPEC argument with the global flags applied.
-func (h *handlers) load(cmd *cli.Command) (*spec.Model, spec.Options, string, error) {
-	opts := spec.Options{Lenient: cmd.Bool("lenient"), AllowCLimits: cmd.Bool("allow-c-limits")}
+func (h *handlers) load(cmd *cli.Command) (*ast.Model, parser.Options, string, error) {
+	opts := parser.Options{Lenient: cmd.Bool("lenient"), AllowCLimits: cmd.Bool("allow-c-limits")}
 	path := cmd.Args().First()
-	m, warns, err := spec.LoadFile(path, opts)
+	m, warns, err := parser.LoadFile(path, opts)
 	report(h.stderr, warns)
 	if err != nil {
 		return nil, opts, path, invalidError{err}
@@ -140,7 +141,7 @@ func (h *handlers) Man(ctx context.Context, cmd *cli.Command) error {
 	return h.write(cmd.String("output"), page)
 }
 
-func report(w io.Writer, diags []spec.Diagnostic) {
+func report(w io.Writer, diags []ast.Diagnostic) {
 	for _, d := range diags {
 		fmt.Fprintln(w, d)
 	}

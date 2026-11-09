@@ -3,8 +3,8 @@ package urfave_test
 import (
 	"encoding/json"
 	"fmt"
-	"go/ast"
-	"go/parser"
+	goast "go/ast"
+	goparser "go/parser"
 	"go/token"
 	"os/exec"
 	"path/filepath"
@@ -14,7 +14,8 @@ import (
 	"unicode"
 
 	"github.com/angrifel/opencligen/internal/golden"
-	"github.com/angrifel/opencligen/spec"
+	"github.com/angrifel/opencligen/internal/opencli/ast"
+	"github.com/angrifel/opencligen/internal/opencli/parser"
 )
 
 // The structure test checks what the generated code builds, not how its
@@ -72,7 +73,7 @@ type invocation struct {
 
 type structureCase struct {
 	name, pkg, path string
-	opts            spec.Options
+	opts            parser.Options
 	golden          bool // compare with specs/golden/<name>/structure.json
 }
 
@@ -85,14 +86,14 @@ func TestStructure(t *testing.T) {
 		structureCase{name: "upstream-git", pkg: "upstreamgit", path: "../../testdata/upstream/git.json"},
 		structureCase{name: "upstream-curl", pkg: "upstreamcurl", path: "../../testdata/upstream/curl.json"},
 		structureCase{name: "upstream-ffmpeg", pkg: "upstreamffmpeg", path: "../../testdata/upstream/ffmpeg.json",
-			opts: spec.Options{Lenient: true, AllowCLimits: true}},
+			opts: parser.Options{Lenient: true, AllowCLimits: true}},
 	)
 
 	s := newScratch(t)
-	models := map[string]*spec.Model{}
+	models := map[string]*ast.Model{}
 	var imports, registrations strings.Builder
 	for i, c := range cases {
-		m, _, err := spec.LoadFile(c.path, c.opts)
+		m, _, err := parser.LoadFile(c.path, c.opts)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -145,19 +146,19 @@ func TestStructure(t *testing.T) {
 // Handlers interface.
 func recorder(t *testing.T, pkg string, src []byte) string {
 	t.Helper()
-	f, err := parser.ParseFile(token.NewFileSet(), "gen.go", src, 0)
+	f, err := goparser.ParseFile(token.NewFileSet(), "gen.go", src, 0)
 	if err != nil {
 		t.Fatal(err)
 	}
 	var b strings.Builder
 	fmt.Fprintf(&b, "package %s\n\nimport (\n\t\"context\"\n\n\t\"github.com/urfave/cli/v3\"\n)\n\n", pkg)
 	b.WriteString("// Recorder implements Handlers by storing the name of the method called.\ntype Recorder struct{ Got *string }\n\n")
-	ast.Inspect(f, func(n ast.Node) bool {
-		ts, ok := n.(*ast.TypeSpec)
+	goast.Inspect(f, func(n goast.Node) bool {
+		ts, ok := n.(*goast.TypeSpec)
 		if !ok || ts.Name.Name != "Handlers" {
 			return true
 		}
-		for _, meth := range ts.Type.(*ast.InterfaceType).Methods.List {
+		for _, meth := range ts.Type.(*goast.InterfaceType).Methods.List {
 			name := meth.Names[0].Name
 			fmt.Fprintf(&b, "func (r Recorder) %s(context.Context, *cli.Command) error { *r.Got = %q; return nil }\n", name, name)
 		}
@@ -174,9 +175,9 @@ func recorder(t *testing.T, pkg string, src []byte) string {
 //     must be accepted at any depth;
 //   - for each ancestor, the same with one of its non-recursive options,
 //     which must be rejected: it belongs to the ancestor only.
-func invocations(m *spec.Model) []invocation {
+func invocations(m *ast.Model) []invocation {
 	var out []invocation
-	m.Root.Walk(func(c *spec.Command) {
+	m.Root.Walk(func(c *ast.Command) {
 		if !c.Runnable() {
 			return
 		}
@@ -229,7 +230,7 @@ func invocations(m *spec.Model) []invocation {
 }
 
 // optionArgs renders an option with a valid value, if it takes one.
-func optionArgs(o *spec.Option) []string {
+func optionArgs(o *ast.Option) []string {
 	args := []string{"--" + o.Names[0]}
 	if o.Value.TakesValue {
 		args = append(args, sample(o.Value))
@@ -238,21 +239,21 @@ func optionArgs(o *spec.Option) []string {
 }
 
 // sample returns a value that satisfies v's type, accepted values and range.
-func sample(v spec.Value) string {
+func sample(v ast.Value) string {
 	if len(v.Accepted) > 0 {
 		return v.Accepted[0]
 	}
 	switch v.Type {
-	case spec.Bool:
+	case ast.Bool:
 		return "true"
-	case spec.Duration:
+	case ast.Duration:
 		return "1s"
-	case spec.Int, spec.Uint, spec.Float:
+	case ast.Int, ast.Uint, ast.Float:
 		if v.Min != nil {
-			return spec.FormatValue(v.Min)
+			return ast.FormatValue(v.Min)
 		}
 		if v.Max != nil {
-			return spec.FormatValue(v.Max)
+			return ast.FormatValue(v.Max)
 		}
 		return "1"
 	}
@@ -260,14 +261,14 @@ func sample(v spec.Value) string {
 }
 
 // builtin reports options urfave/cli provides itself, which are not generated.
-func builtin(m *spec.Model, c *spec.Command, o *spec.Option) bool {
+func builtin(m *ast.Model, c *ast.Command, o *ast.Option) bool {
 	return slices.Contains(o.Names, "help") ||
 		(c.IsRoot() && m.Info.Version != "" && slices.Contains(o.Names, "version"))
 }
 
 // checkCommand checks that the dumped command d models the described command
 // c. handlers maps handler names to the command that uses them.
-func checkCommand(t *testing.T, m *spec.Model, c *spec.Command, d Command, handlers map[string]string) {
+func checkCommand(t *testing.T, m *ast.Model, c *ast.Command, d Command, handlers map[string]string) {
 	t.Helper()
 	where := c.FullName()
 	errorf := func(format string, args ...any) {
@@ -322,7 +323,7 @@ func checkCommand(t *testing.T, m *spec.Model, c *spec.Command, d Command, handl
 		eq("handler", d.Handler, "")
 	}
 
-	var opts []*spec.Option
+	var opts []*ast.Option
 	for _, o := range c.Options {
 		if !builtin(m, c, o) {
 			opts = append(opts, o)
@@ -342,7 +343,7 @@ func checkCommand(t *testing.T, m *spec.Model, c *spec.Command, d Command, handl
 			eq(what+"hidden", f.Hidden, o.Hidden)
 			eq(what+"inherited", f.Inherited, o.Recursive)
 			eq(what+"default", f.Default, wantDefault(o.Value))
-			eq(what+"validated", f.Validated, len(o.Value.Accepted) > 0 || o.Value.HasRange() || (o.Value.Type == spec.Bool && o.Value.TakesValue))
+			eq(what+"validated", f.Validated, len(o.Value.Accepted) > 0 || o.Value.HasRange() || (o.Value.Type == ast.Bool && o.Value.TakesValue))
 		}
 	}
 
@@ -364,7 +365,7 @@ func nonNil(s []string) []string {
 
 // wantHandler is the naming rule of specs/extensions.md: x-go-name, else the
 // command path without the root in CamelCase, "Root" for the root.
-func wantHandler(c *spec.Command) string {
+func wantHandler(c *ast.Command) string {
 	if raw, ok := c.Metadata.Get("x-go-name"); ok {
 		var name string
 		_ = json.Unmarshal(raw, &name)
@@ -384,14 +385,14 @@ func wantHandler(c *spec.Command) string {
 }
 
 // wantFlagType is the urfave/cli flag type a value maps to.
-func wantFlagType(v spec.Value) string {
-	if v.Type == spec.Bool {
+func wantFlagType(v ast.Value) string {
+	if v.Type == ast.Bool {
 		if v.TakesValue {
 			return "StringFlag" // "-flag true", validated
 		}
 		return "BoolFlag"
 	}
-	base := map[spec.Type]string{spec.String: "String", spec.Int: "Int", spec.Uint: "Uint", spec.Float: "Float", spec.Duration: "Duration"}[v.Type]
+	base := map[ast.Type]string{ast.String: "String", ast.Int: "Int", ast.Uint: "Uint", ast.Float: "Float", ast.Duration: "Duration"}[v.Type]
 	if v.Multi {
 		return base + "SliceFlag"
 	}
@@ -400,18 +401,18 @@ func wantFlagType(v spec.Value) string {
 
 // wantDefault renders the default as the dump program prints flag values
 // (fmt.Sprint of the urfave/cli Value field), or "" when there is none.
-func wantDefault(v spec.Value) string {
+func wantDefault(v ast.Value) string {
 	if !v.HasDefault() || len(v.Default) == 0 {
 		return ""
 	}
 	parts := make([]string, len(v.Default))
 	for i, d := range v.Default {
-		parts[i] = spec.FormatValue(d)
+		parts[i] = ast.FormatValue(d)
 	}
 	if v.Multi {
 		return "[" + strings.Join(parts, " ") + "]"
 	}
-	if v.Type == spec.Bool && v.TakesValue {
+	if v.Type == ast.Bool && v.TakesValue {
 		return parts[0] // stored as the string "true" or "false"
 	}
 	if parts[0] == "false" || parts[0] == "0" || parts[0] == "0s" || parts[0] == "" {

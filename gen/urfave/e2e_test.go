@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/angrifel/opencligen/spec"
+	"github.com/angrifel/opencligen/internal/opencli/parser"
 )
 
 // kitchenMain implements the kitchen Handlers by printing what each handler
@@ -56,7 +56,7 @@ func main() {
 // and checks its runtime behaviour.
 func TestEndToEnd(t *testing.T) {
 	s := newScratch(t)
-	m, _, err := spec.LoadFile("../../specs/golden/all-features/spec.json", spec.Options{})
+	m, _, err := parser.LoadFile("../../specs/golden/all-features/spec.json", parser.Options{})
 	if err != nil {
 		t.Fatal(err)
 	}

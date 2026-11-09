@@ -1,4 +1,4 @@
-package spec
+package parser
 
 import (
 	"encoding/json"
@@ -6,6 +6,8 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+
+	"github.com/angrifel/opencligen/internal/opencli/ast"
 )
 
 // The document as decoded, after it passed schema validation.
@@ -18,12 +20,12 @@ type rawDocument struct {
 }
 
 type rawInfo struct {
-	Title       string   `json:"title"`
-	Summary     string   `json:"summary"`
-	Description string   `json:"description"`
-	Version     string   `json:"version"`
-	Contact     *Contact `json:"contact"`
-	License     *License `json:"license"`
+	Title       string       `json:"title"`
+	Summary     string       `json:"summary"`
+	Description string       `json:"description"`
+	Version     string       `json:"version"`
+	Contact     *ast.Contact `json:"contact"`
+	License     *ast.License `json:"license"`
 }
 
 type rawConventions struct {
@@ -32,17 +34,17 @@ type rawConventions struct {
 }
 
 type rawCommand struct {
-	Name        string        `json:"name"`
-	Aliases     []string      `json:"aliases"`
-	Options     []rawOption   `json:"options"`
-	Arguments   []rawArgument `json:"arguments"`
-	Commands    []rawCommand  `json:"commands"`
-	ExitCodes   []ExitCode    `json:"exitCodes"`
-	Description string        `json:"description"`
-	Hidden      bool          `json:"hidden"`
-	Examples    []string      `json:"examples"`
-	Interactive bool          `json:"interactive"`
-	Metadata    []rawMetadata `json:"metadata"`
+	Name        string         `json:"name"`
+	Aliases     []string       `json:"aliases"`
+	Options     []rawOption    `json:"options"`
+	Arguments   []rawArgument  `json:"arguments"`
+	Commands    []rawCommand   `json:"commands"`
+	ExitCodes   []ast.ExitCode `json:"exitCodes"`
+	Description string         `json:"description"`
+	Hidden      bool           `json:"hidden"`
+	Examples    []string       `json:"examples"`
+	Interactive bool           `json:"interactive"`
+	Metadata    []rawMetadata  `json:"metadata"`
 }
 
 type rawOption struct {
@@ -92,13 +94,13 @@ func (a rawArgument) arity() (lo, hi int) {
 	return lo, hi
 }
 
-func metadata(raw []rawMetadata) Metadata {
+func metadata(raw []rawMetadata) ast.Metadata {
 	if len(raw) == 0 {
 		return nil
 	}
-	m := make(Metadata, len(raw))
+	m := make(ast.Metadata, len(raw))
 	for i, r := range raw {
-		m[i] = MetadataEntry(r)
+		m[i] = ast.MetadataEntry(r)
 	}
 	return m
 }
@@ -109,10 +111,10 @@ func FlagName(s string) string {
 	return strings.TrimLeft(s, "-/")
 }
 
-func (l *loader) build(doc *rawDocument) *Model {
-	m := &Model{
+func (l *loader) build(doc *rawDocument) *ast.Model {
+	m := &ast.Model{
 		OpenCLI: doc.OpenCLI,
-		Info: Info{
+		Info: ast.Info{
 			Title:       doc.Info.Title,
 			Summary:     doc.Info.Summary,
 			Description: doc.Info.Description,
@@ -120,7 +122,7 @@ func (l *loader) build(doc *rawDocument) *Model {
 			Contact:     doc.Info.Contact,
 			License:     doc.Info.License,
 		},
-		Conventions: Conventions{GroupOptions: true, OptionSeparator: " "},
+		Conventions: ast.Conventions{GroupOptions: true, OptionSeparator: " "},
 	}
 	if c := doc.Conventions; c != nil {
 		if c.GroupOptions != nil {
@@ -149,8 +151,8 @@ func firstLine(s string) string {
 	return strings.TrimSpace(line)
 }
 
-func (l *loader) command(rc *rawCommand, parent *Command, ptr string) *Command {
-	c := &Command{
+func (l *loader) command(rc *rawCommand, parent *ast.Command, ptr string) *ast.Command {
+	c := &ast.Command{
 		Name:        rc.Name,
 		Aliases:     rc.Aliases,
 		Description: strings.TrimSpace(rc.Description),
@@ -212,7 +214,7 @@ func (l *loader) command(rc *rawCommand, parent *Command, ptr string) *Command {
 
 // commandMetadata reads the x-category, x-usage and x-documentation entries
 // used by the upstream examples.
-func (l *loader) commandMetadata(c *Command) {
+func (l *loader) commandMetadata(c *ast.Command) {
 	for i, e := range c.Metadata {
 		mptr := c.Pointer + "/metadata/" + strconv.Itoa(i) + "/value"
 		switch e.Name {
@@ -235,8 +237,8 @@ func (l *loader) commandMetadata(c *Command) {
 	}
 }
 
-func (l *loader) option(ro *rawOption, where, ptr string) *Option {
-	o := &Option{
+func (l *loader) option(ro *rawOption, where, ptr string) *ast.Option {
+	o := &ast.Option{
 		Name:        ro.Name,
 		Aliases:     ro.Aliases,
 		Description: strings.TrimSpace(ro.Description),
@@ -272,7 +274,7 @@ func (l *loader) option(ro *rawOption, where, ptr string) *Option {
 	return o
 }
 
-func (l *loader) argument(ra *rawArgument, where, ptr string) *Argument {
+func (l *loader) argument(ra *rawArgument, where, ptr string) *ast.Argument {
 	lo, hi := ra.arity()
 	if lo > hi {
 		l.errorf(ptr+"/arity", "%s: argument %q has arity minimum %d greater than maximum %d", where, ra.Name, lo, hi)
@@ -280,7 +282,7 @@ func (l *loader) argument(ra *rawArgument, where, ptr string) *Argument {
 	if !ra.Required {
 		lo = 0
 	}
-	a := &Argument{
+	a := &ast.Argument{
 		Name:        ra.Name,
 		Description: strings.TrimSpace(ra.Description),
 		Group:       ra.Group,
@@ -298,7 +300,7 @@ func (l *loader) argument(ra *rawArgument, where, ptr string) *Argument {
 
 // value resolves x- metadata, downgrading problems to warnings in lenient
 // mode.
-func (l *loader) value(meta Metadata, takesValue, multi bool, accepted []string, what, ptr string) Value {
+func (l *loader) value(meta ast.Metadata, takesValue, multi bool, accepted []string, what, ptr string) ast.Value {
 	v, err := parseValue(meta, takesValue, multi, accepted, l.opts)
 	if err == nil {
 		return v

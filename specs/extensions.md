@@ -7,7 +7,7 @@ OpenCLI examples use for extensions. Other metadata is ignored, so a
 document stays valid OpenCLI and other tools can read it unchanged.
 
 Unless noted otherwise, a problem in an extension is an error. With
-`--lenient` (`spec.Options.Lenient`), problems in `x-type`, `x-default` and
+`--lenient` (`parser.Options.Lenient`), problems in `x-type`, `x-default` and
 `x-range` become warnings and the option or argument is treated as untyped
 instead.
 
@@ -77,7 +77,7 @@ defaults.
 
 #### C limit constants
 
-With `--allow-c-limits` (`spec.Options.AllowCLimits`), bounds and numeric
+With `--allow-c-limits` (`parser.Options.AllowCLimits`), bounds and numeric
 defaults may also be C limit constants, optionally negated, as in the
 upstream ffmpeg example:
 

@@ -9,7 +9,8 @@ import (
 
 	"github.com/angrifel/opencligen/gen/markdown"
 	"github.com/angrifel/opencligen/internal/golden"
-	"github.com/angrifel/opencligen/spec"
+	"github.com/angrifel/opencligen/internal/opencli/ast"
+	"github.com/angrifel/opencligen/internal/opencli/parser"
 )
 
 // TestStructure reads the generated Markdown back into an outline and checks
@@ -31,7 +32,7 @@ func TestStructure(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			m, _, err := spec.LoadFile(c.path, spec.Options{})
+			m, _, err := parser.LoadFile(c.path, parser.Options{})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -49,7 +50,7 @@ func TestStructure(t *testing.T) {
 }
 
 func TestIncludeHidden(t *testing.T) {
-	m, _, err := spec.LoadFile("../../specs/golden/nested-commands/spec.json", spec.Options{})
+	m, _, err := parser.LoadFile("../../specs/golden/nested-commands/spec.json", parser.Options{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -63,7 +64,7 @@ func TestIncludeHidden(t *testing.T) {
 
 // visible reports whether a command is documented by default: neither it nor
 // an ancestor is hidden.
-func visible(c *spec.Command) bool {
+func visible(c *ast.Command) bool {
 	for ; c != nil; c = c.Parent {
 		if c.Hidden {
 			return false
@@ -72,7 +73,7 @@ func visible(c *spec.Command) bool {
 	return true
 }
 
-func checkDocument(t *testing.T, m *spec.Model, doc *section) {
+func checkDocument(t *testing.T, m *ast.Model, doc *section) {
 	t.Helper()
 	if len(doc.Sections) != 1 || doc.Sections[0].Level != 1 {
 		t.Fatalf("want one top-level heading, got %d sections", len(doc.Sections))
@@ -89,8 +90,8 @@ func checkDocument(t *testing.T, m *spec.Model, doc *section) {
 		t.Errorf("document does not start with the summary %q", s)
 	}
 
-	var cmds []*spec.Command
-	m.Root.Walk(func(c *spec.Command) {
+	var cmds []*ast.Command
+	m.Root.Walk(func(c *ast.Command) {
 		if visible(c) {
 			cmds = append(cmds, c)
 		}
@@ -119,7 +120,7 @@ func checkDocument(t *testing.T, m *spec.Model, doc *section) {
 	}
 
 	// Each visible command has exactly one section; hidden ones have none.
-	m.Root.Walk(func(c *spec.Command) {
+	m.Root.Walk(func(c *ast.Command) {
 		secs := top.find("`" + c.FullName() + "`")
 		switch {
 		case !visible(c) && len(secs) > 0:
@@ -142,7 +143,7 @@ func checkDocument(t *testing.T, m *spec.Model, doc *section) {
 	}
 }
 
-func checkCommand(t *testing.T, c *spec.Command, sec *section) {
+func checkCommand(t *testing.T, c *ast.Command, sec *section) {
 	t.Helper()
 	where := c.FullName()
 	errorf := func(format string, args ...any) {
@@ -172,7 +173,7 @@ func checkCommand(t *testing.T, c *spec.Command, sec *section) {
 	checkOptions(t, where, "Options", visibleOptions(c.Options), sec)
 	checkOptions(t, where, "Inherited options", visibleOptions(c.InheritedOptions()), sec)
 
-	var args []*spec.Argument
+	var args []*ast.Argument
 	for _, a := range c.Arguments {
 		if !a.Hidden {
 			args = append(args, a)
@@ -194,7 +195,7 @@ func checkCommand(t *testing.T, c *spec.Command, sec *section) {
 		checkDescription(t, where+": argument "+a.Name, a.Description, a.Required, "", rows[i][2])
 	}
 
-	var subs []*spec.Command
+	var subs []*ast.Command
 	for _, s := range c.Commands {
 		if visible(s) {
 			subs = append(subs, s)
@@ -231,8 +232,8 @@ func checkCommand(t *testing.T, c *spec.Command, sec *section) {
 	}
 }
 
-func visibleOptions(opts []*spec.Option) []*spec.Option {
-	var out []*spec.Option
+func visibleOptions(opts []*ast.Option) []*ast.Option {
+	var out []*ast.Option
 	for _, o := range opts {
 		if !o.Hidden {
 			out = append(out, o)
@@ -241,7 +242,7 @@ func visibleOptions(opts []*spec.Option) []*spec.Option {
 	return out
 }
 
-func checkOptions(t *testing.T, where, heading string, opts []*spec.Option, sec *section) {
+func checkOptions(t *testing.T, where, heading string, opts []*ast.Option, sec *section) {
 	t.Helper()
 	rows := tableRows(t, where, sec, heading, len(opts))
 	for i, o := range opts {
@@ -284,7 +285,7 @@ func tableRows(t *testing.T, where string, sec *section, heading string, n int) 
 
 // checkFacts checks that a value cell states the declared type, accepted
 // values, range and default.
-func checkFacts(t *testing.T, what string, v spec.Value, cell string) {
+func checkFacts(t *testing.T, what string, v ast.Value, cell string) {
 	t.Helper()
 	var want []string
 	if v.Explicit {

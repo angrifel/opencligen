@@ -8,7 +8,7 @@ import (
 
 	"github.com/angrifel/opencligen/gen/man"
 	"github.com/angrifel/opencligen/internal/golden"
-	"github.com/angrifel/opencligen/spec"
+	"github.com/angrifel/opencligen/internal/opencli/parser"
 )
 
 // TestGroff renders pages with groff, when installed, and fails on warnings.
@@ -22,7 +22,7 @@ func TestGroff(t *testing.T) {
 		files = append(files, c.Spec)
 	}
 	for _, f := range files {
-		m, _, err := spec.LoadFile(f, spec.Options{})
+		m, _, err := parser.LoadFile(f, parser.Options{})
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -36,9 +36,9 @@ func TestGroff(t *testing.T) {
 }
 
 func TestEscaping(t *testing.T) {
-	m, _, err := spec.Load("t.json", []byte(`{"opencli": "0.1", "info": {"title": "t", "version": "1"},
+	m, _, err := parser.Load("t.json", []byte(`{"opencli": "0.1", "info": {"title": "t", "version": "1"},
 		"command": {"name": "t", "description": ".starts with a dot\nback\\slash",
-		"options": [{"name": "--dry-run"}]}}`), spec.Options{})
+		"options": [{"name": "--dry-run"}]}}`), parser.Options{})
 	if err != nil {
 		t.Fatal(err)
 	}

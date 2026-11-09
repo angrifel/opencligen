@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/angrifel/opencligen/gen/urfave"
-	"github.com/angrifel/opencligen/spec"
+	"github.com/angrifel/opencligen/internal/opencli/ast"
 )
 
 // scratch is a throwaway Go module for building generated code. It requires
@@ -51,7 +51,7 @@ func (s *scratch) write(name, content string) {
 
 // generate writes the code generated for a description into package pkg
 // and returns the source.
-func (s *scratch) generate(m *spec.Model, pkg string, lenient bool) []byte {
+func (s *scratch) generate(m *ast.Model, pkg string, lenient bool) []byte {
 	s.t.Helper()
 	src, _, err := urfave.Generate(m, urfave.Options{Package: pkg, Lenient: lenient})
 	if err != nil {

@@ -6,7 +6,7 @@ urfave/cli v3 Go code, Markdown and man pages from them.
 All specs are contained in the `specs/` directory; read specs/README.md
 first. It holds opencligen's own CLI description (specs/opencligen.json),
 the x- metadata vocabulary (specs/extensions.md; keep it in sync with
-spec/value.go and spec/build.go), the generated CLI reference
+internal/opencli/parser/value.go and build.go), the generated CLI reference
 (specs/cli.md, specs/opencligen.1) and the golden cases (specs/golden/),
 which define the exact expected output of every generator. When code and
 specs disagree, the specs win. User-facing overview: README.md.
@@ -27,7 +27,11 @@ specs disagree, the specs win. User-facing overview: README.md.
 
 - `schema/<major.minor>/schema.json`: upstream OpenCLI schemas, unmodified,
   embedded. One directory per supported version.
-- `spec/`: loads and validates a document into a `spec.Model`. All parsing and
+- `internal/opencli/ast`: the resolved model (`ast.Model`, commands, options,
+  arguments, values), diagnostics, and `ast.Source`, which maps JSON pointers
+  to line:col (the role go/token plays for go/ast).
+- `internal/opencli/parser`: reads a document, validates it and builds an
+  `ast.Model` (`parser.LoadFile`, `parser.Options`). All parsing and
   semantic rules live here.
 - `gen/urfave`, `gen/markdown`, `gen/man`: outputs; `gen/docs` has shared
   helpers for the documentation outputs.
@@ -51,11 +55,16 @@ specs disagree, the specs win. User-facing overview: README.md.
 
 ## Architecture
 
-- Generators render only from `spec.Model`; they never re-read the JSON. A new
+- The parser and model live under internal/opencli (user decision):
+  `ast` holds the model types, `parser` the reading and validating, named
+  after go/ast and go/parser. Being internal, they are not a public library
+  API. Files that also use the standard library's go/ast or go/parser
+  import those as goast and goparser.
+- Generators render only from `ast.Model`; they never re-read the JSON. A new
   output is a new package under gen/ that walks the model.
 - Generator-specific problems are reported with `Model.Diagnostic`, so they
   carry file:line:col like loader errors.
-- Library code takes options structs (`spec.Options`, `urfave.Options`, ...);
+- Library code takes options structs (`parser.Options`, `urfave.Options`, ...);
   no package-level state.
 - Generated code must not depend on opencligen (user decision): the urfave
   output embeds its helpers. They live in gen/urfave/runtime as a real,
@@ -88,7 +97,7 @@ specs disagree, the specs win. User-facing overview: README.md.
 - Command metadata `x-category`, `x-usage`, `x-documentation` mirror what the
   upstream examples already use. `x-go-name` is ours and urfave-only.
 - OpenCLI allows a subcommand to shadow a name of an inherited recursive option
-  (git's `grep -h`), so the spec package accepts it. Only the urfave output
+  (git's `grep -h`), so the parser accepts it. Only the urfave output
   rejects it, because urfave/cli v3 then drops the whole inherited flag in that
   subcommand (verified by experiment).
 
@@ -165,7 +174,8 @@ specs disagree, the specs win. User-facing overview: README.md.
   byte, except TestGeneratedFilesUpToDate, which checks that committed
   generated files are current.
 
-- Every user-visible error message has a case in spec/load_test.go or
+- Every user-visible error message has a case in
+  internal/opencli/parser/load_test.go or
   gen/urfave/urfave_test.go, including its line:col where relevant.
 - gen/urfave/scratch_test.go provides the throwaway module both build tests
   use: it requires only urfave/cli (GOPROXY=off), so generated code that
@@ -174,7 +184,8 @@ specs disagree, the specs win. User-facing overview: README.md.
   runtime behaviour. Both build tests are skipped with -short.
 - Upstream corpus expectations (dotnet has real duplicate names; ffmpeg needs
   -lenient and -allow-c-limits, 138 warnings) are asserted in
-  spec/load_test.go. Update them deliberately when refreshing the corpus.
+  internal/opencli/parser/load_test.go. Update them deliberately when
+  refreshing the corpus.
 - Never json.Unmarshal into a slice that already holds a json.RawMessage of
   the document: it reuses the backing array and corrupts the source bytes
   (a past bug; see TestMultiDefaultDoesNotCorruptDocument).

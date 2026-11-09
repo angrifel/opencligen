@@ -13,9 +13,9 @@ import (
 	_ "embed"
 	"encoding/json"
 	"fmt"
-	"go/ast"
+	goast "go/ast"
 	"go/format"
-	"go/parser"
+	goparser "go/parser"
 	"go/token"
 	"slices"
 	"strconv"
@@ -23,7 +23,7 @@ import (
 	"time"
 	"unicode"
 
-	"github.com/angrifel/opencligen/spec"
+	"github.com/angrifel/opencligen/internal/opencli/ast"
 )
 
 // Options configure the generated code.
@@ -43,13 +43,13 @@ var runtimeSource string
 // the code after the import block, which is copied into generated files.
 func runtimeParts() (imports []string, body string) {
 	fset := token.NewFileSet()
-	f, err := parser.ParseFile(fset, "runtime.go", runtimeSource, parser.ImportsOnly|parser.ParseComments)
+	f, err := goparser.ParseFile(fset, "runtime.go", runtimeSource, goparser.ImportsOnly|goparser.ParseComments)
 	if err != nil {
 		panic("urfave: embedded runtime does not parse: " + err.Error())
 	}
 	end := 0
 	for _, d := range f.Decls {
-		if gd, ok := d.(*ast.GenDecl); ok && gd.Tok == token.IMPORT {
+		if gd, ok := d.(*goast.GenDecl); ok && gd.Tok == token.IMPORT {
 			end = fset.Position(gd.End()).Offset
 		}
 	}
@@ -61,8 +61,8 @@ func runtimeParts() (imports []string, body string) {
 }
 
 // Generate renders the model as a Go source file. It returns warnings, and
-// a *spec.Error when the model uses features urfave/cli cannot express.
-func Generate(m *spec.Model, opts Options) ([]byte, []spec.Diagnostic, error) {
+// a *ast.Error when the model uses features urfave/cli cannot express.
+func Generate(m *ast.Model, opts Options) ([]byte, []ast.Diagnostic, error) {
 	if opts.Package == "" {
 		opts.Package = "cli"
 	}
@@ -76,16 +76,16 @@ func Generate(m *spec.Model, opts Options) ([]byte, []spec.Diagnostic, error) {
 	g.out = &tree
 	g.command(m.Root)
 
-	var errs, warns []spec.Diagnostic
+	var errs, warns []ast.Diagnostic
 	for _, d := range g.diags {
-		if d.Severity == spec.SeverityWarning {
+		if d.Severity == ast.SeverityWarning {
 			warns = append(warns, d)
 		} else {
 			errs = append(errs, d)
 		}
 	}
 	if len(errs) > 0 {
-		return nil, warns, &spec.Error{Diagnostics: errs}
+		return nil, warns, &ast.Error{Diagnostics: errs}
 	}
 
 	var file bytes.Buffer
@@ -105,10 +105,10 @@ type handler struct {
 }
 
 type generator struct {
-	model    *spec.Model
+	model    *ast.Model
 	opts     Options
 	out      *bytes.Buffer
-	diags    []spec.Diagnostic
+	diags    []ast.Diagnostic
 	handlers []handler
 	methods  map[string]string // method name -> command path
 }
@@ -121,16 +121,16 @@ func (g *generator) p(format string, args ...any) {
 // warning in lenient mode. It returns true when generation may continue with
 // an approximation.
 func (g *generator) unsupported(ptr, format string, args ...any) bool {
-	sev := spec.SeverityError
+	sev := ast.SeverityError
 	if g.opts.Lenient {
-		sev = spec.SeverityWarning
+		sev = ast.SeverityWarning
 	}
 	g.diags = append(g.diags, g.model.Diagnostic(sev, ptr, format, args...))
 	return g.opts.Lenient
 }
 
 func (g *generator) fail(ptr, format string, args ...any) {
-	g.diags = append(g.diags, g.model.Diagnostic(spec.SeverityError, ptr, format, args...))
+	g.diags = append(g.diags, g.model.Diagnostic(ast.SeverityError, ptr, format, args...))
 }
 
 func (g *generator) checkConventions() {
@@ -196,12 +196,12 @@ func (g *generator) header(tree []byte) {
 // everywhere, and --version on the root when info.version is set. Other
 // options may still claim -h or -v; urfave/cli then drops those short
 // aliases from its own flags.
-func (g *generator) builtin(c *spec.Command, o *spec.Option) bool {
+func (g *generator) builtin(c *ast.Command, o *ast.Option) bool {
 	return slices.Contains(o.Names, "help") ||
 		(c.IsRoot() && g.model.Info.Version != "" && slices.Contains(o.Names, "version"))
 }
 
-func (g *generator) command(c *spec.Command) {
+func (g *generator) command(c *ast.Command) {
 	g.p("&cli.Command{\n")
 	g.p("Name: %q,\n", c.Name)
 	if len(c.Aliases) > 0 {
@@ -235,7 +235,7 @@ func (g *generator) command(c *spec.Command) {
 	}
 
 	g.checkShadowing(c)
-	var flags []*spec.Option
+	var flags []*ast.Option
 	for _, o := range c.Options {
 		if !g.builtin(c, o) {
 			flags = append(flags, o)
@@ -275,7 +275,7 @@ func (g *generator) command(c *spec.Command) {
 // checkShadowing reports options that reuse a name of an inherited recursive
 // option. urfave/cli lets the subcommand's flag win but then drops the whole
 // inherited flag in that subcommand, so its other names stop working there.
-func (g *generator) checkShadowing(c *spec.Command) {
+func (g *generator) checkShadowing(c *ast.Command) {
 	inherited := c.InheritedOptions()
 	for _, o := range c.Options {
 		if g.builtin(c, o) {
@@ -304,7 +304,7 @@ func (g *generator) checkShadowing(c *spec.Command) {
 // method returns the Handlers method of a runnable command: the x-go-name
 // metadata when present, otherwise the command path in CamelCase without
 // the root ("Root" for the root itself).
-func (g *generator) method(c *spec.Command) string {
+func (g *generator) method(c *ast.Command) string {
 	name := ""
 	if raw, ok := c.Metadata.Get("x-go-name"); ok {
 		if err := json.Unmarshal(raw, &name); err != nil || !token.IsIdentifier(name) || !unicode.IsUpper([]rune(name)[0]) {
@@ -349,7 +349,7 @@ func defaultMethod(path []string) string {
 	return name
 }
 
-func longDescription(c *spec.Command) string {
+func longDescription(c *ast.Command) string {
 	var parts []string
 	// urfave/cli shows Usage (the summary) next to the name, so leave it out
 	// when the description starts with it.
@@ -380,31 +380,31 @@ func longDescription(c *spec.Command) string {
 }
 
 // goType is the Go element type of a value type.
-var goType = map[spec.Type]string{
-	spec.String:   "string",
-	spec.Int:      "int",
-	spec.Uint:     "uint",
-	spec.Float:    "float64",
-	spec.Bool:     "bool",
-	spec.Duration: "time.Duration",
+var goType = map[ast.Type]string{
+	ast.String:   "string",
+	ast.Int:      "int",
+	ast.Uint:     "uint",
+	ast.Float:    "float64",
+	ast.Bool:     "bool",
+	ast.Duration: "time.Duration",
 }
 
 // flagType returns the urfave/cli flag type for a value.
-func flagType(v spec.Value) string {
-	if v.Type == spec.Bool {
+func flagType(v ast.Value) string {
+	if v.Type == ast.Bool {
 		if v.TakesValue {
 			return "StringFlag" // "-flag true"; BoolFlag never consumes an argument
 		}
 		return "BoolFlag"
 	}
-	base := map[spec.Type]string{spec.String: "String", spec.Int: "Int", spec.Uint: "Uint", spec.Float: "Float", spec.Duration: "Duration"}[v.Type]
+	base := map[ast.Type]string{ast.String: "String", ast.Int: "Int", ast.Uint: "Uint", ast.Float: "Float", ast.Duration: "Duration"}[v.Type]
 	if v.Multi {
 		return base + "SliceFlag"
 	}
 	return base + "Flag"
 }
 
-func (g *generator) flag(o *spec.Option) {
+func (g *generator) flag(o *ast.Option) {
 	v := o.Value
 	if len(o.ValueNames) > 1 && !g.unsupported(o.Pointer+"/arguments",
 		"option %q takes %d arguments per use, which urfave/cli flags cannot express", o.Name, len(o.ValueNames)) {
@@ -440,10 +440,10 @@ func (g *generator) flag(o *spec.Option) {
 }
 
 // check returns a validator expression for a flag value, or "".
-func (g *generator) check(name string, v spec.Value) string {
+func (g *generator) check(name string, v ast.Value) string {
 	var c string
 	switch {
-	case v.Type == spec.Bool && v.TakesValue:
+	case v.Type == ast.Bool && v.TakesValue:
 		c = fmt.Sprintf("ocliBool(%q)", name)
 	case len(v.Accepted) > 0:
 		c = fmt.Sprintf("ocliOneOf(%q, %s)", name, quoteAll(v.Accepted))
@@ -459,14 +459,14 @@ func (g *generator) check(name string, v spec.Value) string {
 	return c
 }
 
-func between(name string, v spec.Value) string {
+func between(name string, v ast.Value) string {
 	lo, hasLo := boundLiteral(v.Min)
 	hi, hasHi := boundLiteral(v.Max)
 	return fmt.Sprintf("ocliBetween[%s](%q, %s, %t, %s, %t)", goType[v.Type], name, lo, hasLo, hi, hasHi)
 }
 
 // argSpecs renders the ocliArg list of a command's positional arguments.
-func (g *generator) argSpecs(args []*spec.Argument) string {
+func (g *generator) argSpecs(args []*ast.Argument) string {
 	if len(args) == 0 {
 		return "nil"
 	}
@@ -484,25 +484,25 @@ func (g *generator) argSpecs(args []*spec.Argument) string {
 	return b.String()
 }
 
-func argCheck(name string, v spec.Value) string {
+func argCheck(name string, v ast.Value) string {
 	rng := "nil"
 	if v.HasRange() {
 		rng = between(name, v)
 	}
 	switch v.Type {
-	case spec.String:
+	case ast.String:
 		if len(v.Accepted) > 0 {
 			return fmt.Sprintf("ocliOneOf(%q, %s)", name, quoteAll(v.Accepted))
 		}
-	case spec.Int:
+	case ast.Int:
 		return fmt.Sprintf("ocliInt(%q, %s)", name, rng)
-	case spec.Uint:
+	case ast.Uint:
 		return fmt.Sprintf("ocliUint(%q, %s)", name, rng)
-	case spec.Float:
+	case ast.Float:
 		return fmt.Sprintf("ocliFloat(%q, %s)", name, rng)
-	case spec.Bool:
+	case ast.Bool:
 		return fmt.Sprintf("ocliBool(%q)", name)
-	case spec.Duration:
+	case ast.Duration:
 		return fmt.Sprintf("ocliDuration(%q)", name)
 	}
 	return ""
@@ -530,8 +530,8 @@ func goValue(v any) string {
 	}
 }
 
-func defaultLiteral(v spec.Value) string {
-	if v.Type == spec.Bool && v.TakesValue {
+func defaultLiteral(v ast.Value) string {
+	if v.Type == ast.Bool && v.TakesValue {
 		return strconv.Quote(strconv.FormatBool(v.Default[0].(bool)))
 	}
 	parts := make([]string, len(v.Default))

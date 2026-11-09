@@ -91,16 +91,12 @@ OpenCLI 0.1 has no value types. opencligen reads them from `x-type`,
 `x-default` and `x-range` metadata, and a few command-level entries such as
 `x-category` and `x-usage`. See [specs/extensions.md](specs/extensions.md).
 
-## As a library
+## Architecture
 
-```go
-m, warnings, err := spec.LoadFile("cli.json", spec.Options{})
-src, genWarnings, err := urfave.Generate(m, urfave.Options{Package: "cli"})
-md := markdown.Generate(m, markdown.Options{})
-```
-
-`spec.Model` is the resolved description that every output renders from;
-new outputs only need to walk it.
+`internal/opencli/parser` reads a description and builds an
+`internal/opencli/ast` model, the resolved description that every output
+renders from; new outputs only need to walk it. Both packages are internal:
+opencligen is used as a command, not as a library.
 
 ## Supported OpenCLI versions
 

@@ -15,7 +15,7 @@ import (
 	"github.com/angrifel/opencligen/gen/man"
 	"github.com/angrifel/opencligen/gen/markdown"
 	"github.com/angrifel/opencligen/gen/urfave"
-	"github.com/angrifel/opencligen/spec"
+	"github.com/angrifel/opencligen/internal/opencli/parser"
 )
 
 // Spec is the description of opencligen, relative to the repository root.
@@ -24,7 +24,7 @@ const Spec = "specs/opencligen.json"
 // Files returns the generated files keyed by their path relative to the
 // repository root, which is root.
 func Files(root string) (map[string][]byte, error) {
-	m, _, err := spec.LoadFile(filepath.Join(root, Spec), spec.Options{})
+	m, _, err := parser.LoadFile(filepath.Join(root, Spec), parser.Options{})
 	if err != nil {
 		return nil, err
 	}

@@ -6,12 +6,13 @@ import (
 	"testing"
 
 	"github.com/angrifel/opencligen/gen/urfave"
-	"github.com/angrifel/opencligen/spec"
+	"github.com/angrifel/opencligen/internal/opencli/ast"
+	"github.com/angrifel/opencligen/internal/opencli/parser"
 )
 
-func load(t *testing.T, src string) *spec.Model {
+func load(t *testing.T, src string) *ast.Model {
 	t.Helper()
-	m, _, err := spec.Load("test.json", []byte(src), spec.Options{})
+	m, _, err := parser.Load("test.json", []byte(src), parser.Options{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -62,7 +63,7 @@ func TestUnsupported(t *testing.T) {
 		t.Run(c.name, func(t *testing.T) {
 			m := load(t, c.src)
 			_, _, err := urfave.Generate(m, urfave.Options{})
-			var se *spec.Error
+			var se *ast.Error
 			if !errors.As(err, &se) || !strings.Contains(err.Error(), c.want) {
 				t.Fatalf("error = %v, want it to contain %q", err, c.want)
 			}
@@ -74,7 +75,7 @@ func TestUnsupported(t *testing.T) {
 				}
 				return
 			}
-			if err != nil || len(warns) != 1 || warns[0].Severity != spec.SeverityWarning || len(src) == 0 {
+			if err != nil || len(warns) != 1 || warns[0].Severity != ast.SeverityWarning || len(src) == 0 {
 				t.Fatalf("lenient mode: err = %v, warnings = %v", err, warns)
 			}
 		})

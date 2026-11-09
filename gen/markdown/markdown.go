@@ -10,7 +10,7 @@ import (
 	"unicode"
 
 	"github.com/angrifel/opencligen/gen/docs"
-	"github.com/angrifel/opencligen/spec"
+	"github.com/angrifel/opencligen/internal/opencli/ast"
 )
 
 // Options configure the generated document.
@@ -19,14 +19,14 @@ type Options struct {
 }
 
 // Generate renders the model as Markdown.
-func Generate(m *spec.Model, opts Options) []byte {
+func Generate(m *ast.Model, opts Options) []byte {
 	g := &generator{model: m, opts: opts}
 	g.document()
 	return g.buf.Bytes()
 }
 
 type generator struct {
-	model *spec.Model
+	model *ast.Model
 	opts  Options
 	buf   bytes.Buffer
 }
@@ -117,7 +117,7 @@ func link(text, url string) string {
 	return "[" + cell(text) + "](" + url + ")"
 }
 
-func (g *generator) command(c *spec.Command) {
+func (g *generator) command(c *ast.Command) {
 	g.p("## `%s`\n\n", c.FullName())
 	if !c.IsRoot() {
 		if c.Summary != "" {
@@ -183,7 +183,7 @@ func (g *generator) command(c *spec.Command) {
 		g.p("\n")
 	}
 
-	var subs []*spec.Command
+	var subs []*ast.Command
 	for _, s := range c.Commands {
 		if docs.Visible(s, g.opts.IncludeHidden) {
 			subs = append(subs, s)
@@ -209,7 +209,7 @@ func (g *generator) command(c *spec.Command) {
 	}
 }
 
-func (g *generator) optionTable(opts []*spec.Option) {
+func (g *generator) optionTable(opts []*ast.Option) {
 	g.p("| Option | Value | Description |\n|---|---|---|\n")
 	for _, o := range opts {
 		names := code(docs.OptionNames(o)...)

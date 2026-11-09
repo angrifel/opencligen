@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/angrifel/opencligen/gen/docs"
-	"github.com/angrifel/opencligen/spec"
+	"github.com/angrifel/opencligen/internal/opencli/ast"
 )
 
 // Options configure the generated page.
@@ -20,7 +20,7 @@ type Options struct {
 }
 
 // Generate renders the model as a man page.
-func Generate(m *spec.Model, opts Options) []byte {
+func Generate(m *ast.Model, opts Options) []byte {
 	if opts.Section == "" {
 		opts.Section = "1"
 	}
@@ -30,7 +30,7 @@ func Generate(m *spec.Model, opts Options) []byte {
 }
 
 type generator struct {
-	model *spec.Model
+	model *ast.Model
 	opts  Options
 	buf   bytes.Buffer
 }
@@ -136,7 +136,7 @@ func (g *generator) page() {
 	g.seeAlso()
 }
 
-func (g *generator) synopsis(c *spec.Command) {
+func (g *generator) synopsis(c *ast.Command) {
 	if len(c.Usage) > 0 {
 		g.req(".nf")
 		for _, u := range c.Usage {
@@ -152,7 +152,7 @@ func (g *generator) synopsis(c *spec.Command) {
 	}
 }
 
-func (g *generator) command(c *spec.Command) {
+func (g *generator) command(c *ast.Command) {
 	g.req(".SS %q", esc(c.FullName()))
 	g.synopsis(c)
 	g.req(".PP")
@@ -191,7 +191,7 @@ func (g *generator) command(c *spec.Command) {
 	}
 }
 
-func (g *generator) options(opts []*spec.Option) {
+func (g *generator) options(opts []*ast.Option) {
 	for _, o := range opts {
 		g.req(".TP")
 		names := docs.OptionNames(o)
@@ -217,7 +217,7 @@ func (g *generator) options(opts []*spec.Option) {
 	}
 }
 
-func (g *generator) arguments(args []*spec.Argument) {
+func (g *generator) arguments(args []*ast.Argument) {
 	for _, a := range args {
 		g.req(".TP")
 		head := `\fI` + esc(a.Name) + `\fR`
@@ -249,7 +249,7 @@ func (g *generator) examples(ex []string) {
 	g.req(".RE")
 }
 
-func (g *generator) exitCodes(codes []spec.ExitCode) {
+func (g *generator) exitCodes(codes []ast.ExitCode) {
 	for _, e := range codes {
 		g.req(".TP")
 		g.line(fmt.Sprintf(`\fB%d\fR`, e.Code))

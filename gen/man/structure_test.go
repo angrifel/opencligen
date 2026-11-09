@@ -9,7 +9,8 @@ import (
 
 	"github.com/angrifel/opencligen/gen/man"
 	"github.com/angrifel/opencligen/internal/golden"
-	"github.com/angrifel/opencligen/spec"
+	"github.com/angrifel/opencligen/internal/opencli/ast"
+	"github.com/angrifel/opencligen/internal/opencli/parser"
 )
 
 // TestStructure reads the generated man page back into sections and blocks
@@ -31,7 +32,7 @@ func TestStructure(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			m, _, err := spec.LoadFile(c.path, spec.Options{})
+			m, _, err := parser.LoadFile(c.path, parser.Options{})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -51,7 +52,7 @@ func TestStructure(t *testing.T) {
 	}
 }
 
-func visible(c *spec.Command) bool {
+func visible(c *ast.Command) bool {
 	for ; c != nil; c = c.Parent {
 		if c.Hidden {
 			return false
@@ -63,7 +64,7 @@ func visible(c *spec.Command) bool {
 // flat collapses whitespace, so text compares independently of line breaks.
 func flat(s string) string { return strings.Join(strings.Fields(s), " ") }
 
-func checkPage(t *testing.T, m *spec.Model, p *page) {
+func checkPage(t *testing.T, m *ast.Model, p *page) {
 	t.Helper()
 	root := m.Root
 	title := m.Info.Title
@@ -79,8 +80,8 @@ func checkPage(t *testing.T, m *spec.Model, p *page) {
 	}
 
 	// Sections appear in this order, each only when it has content.
-	var cmds []*spec.Command
-	root.Walk(func(c *spec.Command) {
+	var cmds []*ast.Command
+	root.Walk(func(c *ast.Command) {
 		if visible(c) && !c.IsRoot() {
 			cmds = append(cmds, c)
 		}
@@ -148,7 +149,7 @@ func checkPage(t *testing.T, m *spec.Model, p *page) {
 	}
 }
 
-func checkSynopsis(t *testing.T, c *spec.Command, blocks []mblock) {
+func checkSynopsis(t *testing.T, c *ast.Command, blocks []mblock) {
 	t.Helper()
 	if len(blocks) == 0 {
 		t.Errorf("%s: no synopsis", c.FullName())
@@ -165,7 +166,7 @@ func checkSynopsis(t *testing.T, c *spec.Command, blocks []mblock) {
 	}
 }
 
-func checkCommand(t *testing.T, c *spec.Command, s *msection) {
+func checkCommand(t *testing.T, c *ast.Command, s *msection) {
 	t.Helper()
 	where := c.FullName()
 	if s.Name != where {
@@ -223,7 +224,7 @@ func entries(blocks []mblock) []mblock {
 	return out
 }
 
-func checkOptionEntries(t *testing.T, where string, opts []*spec.Option, blocks []mblock) {
+func checkOptionEntries(t *testing.T, where string, opts []*ast.Option, blocks []mblock) {
 	t.Helper()
 	es := entries(blocks)
 	if len(es) != len(opts) {
@@ -249,7 +250,7 @@ func checkOptionEntries(t *testing.T, where string, opts []*spec.Option, blocks 
 	}
 }
 
-func checkArgumentEntries(t *testing.T, where string, args []*spec.Argument, blocks []mblock) {
+func checkArgumentEntries(t *testing.T, where string, args []*ast.Argument, blocks []mblock) {
 	t.Helper()
 	es := entries(blocks)
 	if len(es) != len(args) {
@@ -275,7 +276,7 @@ func checkArgumentEntries(t *testing.T, where string, args []*spec.Argument, blo
 	}
 }
 
-func checkExitCodes(t *testing.T, where string, codes []spec.ExitCode, blocks []mblock) {
+func checkExitCodes(t *testing.T, where string, codes []ast.ExitCode, blocks []mblock) {
 	t.Helper()
 	es := entries(blocks)
 	if len(es) != len(codes) {
@@ -291,7 +292,7 @@ func checkExitCodes(t *testing.T, where string, codes []spec.ExitCode, blocks []
 
 // checkFacts checks that an entry body states the declared type, accepted
 // values, range and default.
-func checkFacts(t *testing.T, what string, v spec.Value, body string) {
+func checkFacts(t *testing.T, what string, v ast.Value, body string) {
 	t.Helper()
 	var want []string
 	if v.Explicit {
@@ -313,8 +314,8 @@ func checkFacts(t *testing.T, what string, v spec.Value, body string) {
 	}
 }
 
-func visibleOptions(opts []*spec.Option) []*spec.Option {
-	var out []*spec.Option
+func visibleOptions(opts []*ast.Option) []*ast.Option {
+	var out []*ast.Option
 	for _, o := range opts {
 		if !o.Hidden {
 			out = append(out, o)
@@ -323,8 +324,8 @@ func visibleOptions(opts []*spec.Option) []*spec.Option {
 	return out
 }
 
-func visibleArguments(args []*spec.Argument) []*spec.Argument {
-	var out []*spec.Argument
+func visibleArguments(args []*ast.Argument) []*ast.Argument {
+	var out []*ast.Argument
 	for _, a := range args {
 		if !a.Hidden {
 			out = append(out, a)
