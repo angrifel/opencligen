@@ -1,0 +1,148 @@
+{
+	"opencli": "0.1",
+	"info": {
+		"title": "Repo",
+		"summary": "A fictional repository tool with commands nested four levels deep",
+		"version": "2.0.0"
+	},
+	"command": {
+		"name": "repo",
+		"options": [
+			{ "name": "--verbose", "aliases": ["-v"], "description": "Print more", "recursive": true },
+			{
+				"name": "--config",
+				"description": "Configuration file",
+				"recursive": true,
+				"arguments": [{ "name": "file", "required": true }]
+			},
+			{ "name": "--color", "description": "Only for the root command" }
+		],
+		"commands": [
+			{
+				"name": "remote",
+				"aliases": ["r"],
+				"description": "Manage remotes",
+				"options": [
+					{ "name": "--dry-run", "description": "Show what would change", "recursive": true }
+				],
+				"commands": [
+					{
+						"name": "add",
+						"description": "Add a remote",
+						"options": [{ "name": "--fetch", "description": "Fetch after adding" }],
+						"arguments": [
+							{ "name": "name", "required": true },
+							{ "name": "url", "required": true }
+						]
+					},
+					{
+						"name": "list",
+						"aliases": ["ls"],
+						"description": "List remotes",
+						"arguments": [{ "name": "pattern" }]
+					},
+					{
+						"name": "set-url",
+						"description": "Change the URL of a remote",
+						"arguments": [
+							{ "name": "name", "required": true },
+							{ "name": "url", "required": true }
+						]
+					},
+					{
+						"name": "branch",
+						"description": "Manage the branches of a remote",
+						"options": [
+							{ "name": "--dry-run", "description": "Show what would change", "recursive": true }
+						],
+						"commands": [
+							{
+								"name": "list",
+								"description": "List the branches of a remote",
+								"arguments": [{ "name": "remote", "required": true }]
+							},
+							{
+								"name": "prune",
+								"hidden": true,
+								"description": "Remove stale branches",
+								"options": [
+									{
+										"name": "--older-than",
+										"description": "Only branches older than this",
+										"arguments": [{ "name": "age", "required": true }],
+										"metadata": [
+											{ "name": "x-type", "value": "duration" },
+											{ "name": "x-default", "value": "720h" }
+										]
+									}
+								]
+							}
+						]
+					}
+				]
+			},
+			{
+				"name": "branch",
+				"description": "Manage local branches",
+				"metadata": [{ "name": "x-category", "value": "Branches" }],
+				"commands": [
+					{ "name": "list", "description": "List local branches" },
+					{
+						"name": "create",
+						"description": "Create a branch",
+						"metadata": [{ "name": "x-go-name", "value": "NewBranch" }],
+						"arguments": [{ "name": "name", "required": true }]
+					},
+					{
+						"name": "delete",
+						"aliases": ["rm"],
+						"description": "Delete branches",
+						"options": [{ "name": "--force", "aliases": ["-f"], "description": "Delete even if unmerged" }],
+						"arguments": [
+							{ "name": "name", "required": true, "arity": { "minimum": 1, "maximum": 10 } }
+						]
+					}
+				]
+			},
+			{
+				"name": "config",
+				"description": "Read or write configuration\n\nWith no key, prints the whole configuration.",
+				"arguments": [
+					{ "name": "key" },
+					{ "name": "value" }
+				],
+				"commands": [
+					{ "name": "edit", "description": "Open the configuration in an editor", "interactive": true }
+				]
+			},
+			{
+				"name": "admin",
+				"hidden": true,
+				"description": "Maintenance commands",
+				"commands": [
+					{
+						"name": "gc",
+						"description": "Collect garbage",
+						"options": [
+							{
+								"name": "--keep",
+								"required": true,
+								"description": "Number of objects to keep",
+								"arguments": [{ "name": "n", "required": true }],
+								"metadata": [
+									{ "name": "x-type", "value": "int" },
+									{ "name": "x-range", "value": { "minimum": 0 } }
+								]
+							}
+						]
+					}
+				]
+			},
+			{
+				"name": "sync",
+				"description": "Synchronise with all remotes",
+				"options": [{ "name": "--dry-run", "description": "Show what would change" }]
+			}
+		]
+	}
+}

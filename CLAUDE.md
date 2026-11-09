@@ -19,7 +19,7 @@ specs disagree, the specs win. User-facing overview: README.md.
   directly, so it works even when the committed generated code is broken.
 - `make test`: vet, gofmt check, all tests (includes building generated code).
 - `make update-golden`: accept intended changes to generator output; review the
-  diff of specs/golden before committing.
+  diff of specs/golden (structure.json and .golden files) before committing.
 - `make update-upstream`: refresh schema/ and testdata/upstream/ from
   OPENCLI_REF in the Makefile.
 
@@ -38,8 +38,10 @@ specs disagree, the specs win. User-facing overview: README.md.
 - `cmd/opencligen`: the CLI. `internal/app/app.gen.go` is generated from
   `specs/opencligen.json`; `main.go` implements its `Handlers`.
 - `specs/`: all specifications and docs (see # Specs). `specs/golden/<case>/`
-  holds a golden case: `spec.json` plus one expected file per generator;
-  tests iterate over every case directory. The all-features case (a
+  holds a golden case: `spec.json`, `structure.json` (expected command tree
+  of the urfave output) and byte-exact Markdown and man goldens; tests
+  iterate over every case directory. specs/golden/README.md explains how
+  each is checked. The all-features case (a
   fictional CLI named kitchen) exercises every feature; extend it, or add a
   case, when adding one. Name cases with plain descriptive words, never
   idioms: readers may not have English as their first language.
@@ -140,11 +142,27 @@ specs disagree, the specs win. User-facing overview: README.md.
 
 # Testing
 
+- Generated Go code is tested for structure and properties, never as text
+  (user decision: byte-exact Go goldens broke on harmless reordering).
+  gen/urfave/structure_test.go builds the generated code, dumps the
+  urfave/cli tree that New returns, checks it against the description
+  (every command and option at every depth), runs every runnable command to
+  find the handler it reaches, checks that ancestors' recursive options are
+  accepted and their non-recursive ones rejected, and compares the dump with
+  structure.json. It also runs on the upstream corpus. When the generator
+  changes, keep the property checks and wantHandler/wantFlagType in the test
+  as an independent statement of the mapping; do not derive them from the
+  generator.
+- Docs outputs (Markdown, man) are still byte-exact goldens: their text is
+  the product.
+
 - Every user-visible error message has a case in spec/load_test.go or
   gen/urfave/urfave_test.go, including its line:col where relevant.
-- gen/urfave/e2e_test.go builds the generated kitchen CLI in a scratch module
-  (GOPROXY=off, replace to this repo) and runs it; it also compiles the
-  git, curl and ffmpeg output. Skipped with -short.
+- gen/urfave/scratch_test.go provides the throwaway module both build tests
+  use: it requires only urfave/cli (GOPROXY=off), so generated code that
+  depends on opencligen fails to build. gen/urfave/e2e_test.go builds the
+  all-features CLI (named kitchen) with hand-written handlers and checks
+  runtime behaviour. Both build tests are skipped with -short.
 - Upstream corpus expectations (dotnet has real duplicate names; ffmpeg needs
   -lenient and -allow-c-limits, 138 warnings) are asserted in
   spec/load_test.go. Update them deliberately when refreshing the corpus.

@@ -1,13 +1,10 @@
 package urfave_test
 
 import (
-	"os"
 	"os/exec"
-	"path/filepath"
 	"strings"
 	"testing"
 
-	"github.com/angrifel/opencligen/gen/urfave"
 	"github.com/angrifel/opencligen/spec"
 )
 
@@ -22,7 +19,7 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"example.com/e2e/kitchen"
+	"example.com/scratch/kitchen"
 )
 
 type handlers struct{}
@@ -54,74 +51,18 @@ func main() {
 }
 `
 
-// TestEndToEnd generates code into a scratch module that depends only on
-// urfave/cli, builds it and runs the kitchen CLI; it also compiles the code
-// generated for the upstream examples.
+// TestEndToEnd builds the CLI generated for the all-features case (a
+// fictional CLI named kitchen) with a hand-written Handlers implementation,
+// and checks its runtime behaviour.
 func TestEndToEnd(t *testing.T) {
-	if testing.Short() {
-		t.Skip("builds Go code")
-	}
-	goBin, err := exec.LookPath("go")
-	if err != nil {
-		t.Skip("go not found")
-	}
-	root, err := filepath.Abs("../..")
+	s := newScratch(t)
+	m, _, err := spec.LoadFile("../../specs/golden/all-features/spec.json", spec.Options{})
 	if err != nil {
 		t.Fatal(err)
 	}
-	dir := t.TempDir()
-	write := func(name, content string) {
-		t.Helper()
-		path := filepath.Join(dir, name)
-		if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
-			t.Fatal(err)
-		}
-		if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
-			t.Fatal(err)
-		}
-	}
-	sum, err := os.ReadFile(filepath.Join(root, "go.sum"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	// The scratch module requires only urfave/cli: generated code must not
-	// depend on opencligen.
-	write("go.mod", "module example.com/e2e\n\ngo 1.24\n\nrequire github.com/urfave/cli/v3 v3.14.0\n")
-	write("go.sum", string(sum))
-	write("main.go", kitchenMain)
-
-	generate := func(specPath, pkg string, opts spec.Options) {
-		t.Helper()
-		m, _, err := spec.LoadFile(specPath, opts)
-		if err != nil {
-			t.Fatal(err)
-		}
-		src, _, err := urfave.Generate(m, urfave.Options{Package: pkg, Lenient: opts.Lenient})
-		if err != nil {
-			t.Fatal(err)
-		}
-		if strings.Contains(string(src), "angrifel/opencligen") {
-			t.Errorf("%s: generated code refers to opencligen", pkg)
-		}
-		write(pkg+"/gen.go", string(src))
-	}
-	generate(filepath.Join(root, "specs/golden/all-features/spec.json"), "kitchen", spec.Options{})
-	generate(filepath.Join(root, "testdata/upstream/git.json"), "git", spec.Options{})
-	generate(filepath.Join(root, "testdata/upstream/curl.json"), "curl", spec.Options{})
-	generate(filepath.Join(root, "testdata/upstream/ffmpeg.json"), "ffmpeg", spec.Options{Lenient: true, AllowCLimits: true})
-
-	gocmd := func(args ...string) {
-		t.Helper()
-		cmd := exec.Command(goBin, args...)
-		cmd.Dir = dir
-		cmd.Env = append(os.Environ(), "GOFLAGS=-mod=mod", "GOPROXY=off", "GOWORK=off")
-		if out, err := cmd.CombinedOutput(); err != nil {
-			t.Fatalf("go %s: %v\n%s", strings.Join(args, " "), err, out)
-		}
-	}
-	bin := filepath.Join(dir, "kitchen-bin")
-	gocmd("build", "-o", bin, ".")
-	gocmd("vet", "./...")
+	s.generate(m, "kitchen", false)
+	s.write("main.go", kitchenMain)
+	bin := s.build()
 
 	cases := []struct {
 		args string

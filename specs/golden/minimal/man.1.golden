@@ -1,0 +1,5 @@
+.TH "HELLO" "1" "" "hello 1.0.0" "Hello"
+.SH NAME
+hello
+.SH SYNOPSIS
+.B hello

@@ -1,0 +1,10 @@
+{
+	"opencli": "0.1",
+	"info": {
+		"title": "Hello",
+		"version": "1.0.0"
+	},
+	"command": {
+		"name": "hello"
+	}
+}

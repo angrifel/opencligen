@@ -1,0 +1,116 @@
+{
+  "name": "kitchen",
+  "usage": "Exercises every feature opencligen supports",
+  "description": "A test CLI.\n\nIt covers types, defaults, ranges, positional arguments and metadata.\n\nDocumentation: https://example.com/docs",
+  "version": "1.2.3",
+  "groupShortOptions": true,
+  "flags": [
+    {
+      "type": "BoolFlag",
+      "names": [
+        "verbose",
+        "v"
+      ],
+      "usage": "Print more",
+      "inherited": true
+    }
+  ],
+  "commands": [
+    {
+      "name": "cook",
+      "aliases": [
+        "c"
+      ],
+      "usage": "Cook a dish",
+      "usageText": "kitchen cook [options] \u003cdish\u003e [\u003cservings\u003e]",
+      "description": "Cooks the given dish with the given options.\n\nExamples:\n  kitchen cook pasta 2\n  kitchen cook --heat 7 soup\n\nExit codes:\n  0  Served\n  3  Burnt",
+      "category": "Meals",
+      "argsUsage": "\u003cdish\u003e [\u003cservings\u003e]",
+      "runnable": true,
+      "handler": "Cook",
+      "flags": [
+        {
+          "type": "IntFlag",
+          "names": [
+            "heat"
+          ],
+          "usage": "Heat level",
+          "default": "5",
+          "validated": true
+        },
+        {
+          "type": "DurationFlag",
+          "names": [
+            "timer"
+          ],
+          "default": "1m30s"
+        },
+        {
+          "type": "StringFlag",
+          "names": [
+            "style"
+          ],
+          "category": "Presentation",
+          "default": "plain",
+          "validated": true
+        },
+        {
+          "type": "FloatSliceFlag",
+          "names": [
+            "weights",
+            "w"
+          ],
+          "default": "[0.5 2]",
+          "validated": true
+        },
+        {
+          "type": "StringFlag",
+          "names": [
+            "salt"
+          ],
+          "default": "true",
+          "validated": true
+        },
+        {
+          "type": "UintFlag",
+          "names": [
+            "batch"
+          ],
+          "required": true
+        },
+        {
+          "type": "BoolFlag",
+          "names": [
+            "secret"
+          ],
+          "usage": "Not documented",
+          "hidden": true
+        }
+      ]
+    },
+    {
+      "name": "pantry",
+      "usage": "Manage the pantry",
+      "argsUsage": "[\u003cshelf\u003e...]",
+      "runnable": true,
+      "handler": "Pantry",
+      "commands": [
+        {
+          "name": "add",
+          "usage": "Add items",
+          "description": "This command is interactive.",
+          "argsUsage": "\u003citem\u003e...",
+          "runnable": true,
+          "handler": "AddToPantry"
+        }
+      ]
+    },
+    {
+      "name": "debug",
+      "usage": "Internal",
+      "hidden": true,
+      "runnable": true,
+      "handler": "Debug"
+    }
+  ]
+}

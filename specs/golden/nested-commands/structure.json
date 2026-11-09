@@ -1,0 +1,222 @@
+{
+  "name": "repo",
+  "usage": "A fictional repository tool with commands nested four levels deep",
+  "version": "2.0.0",
+  "groupShortOptions": true,
+  "flags": [
+    {
+      "type": "BoolFlag",
+      "names": [
+        "verbose",
+        "v"
+      ],
+      "usage": "Print more",
+      "inherited": true
+    },
+    {
+      "type": "StringFlag",
+      "names": [
+        "config"
+      ],
+      "usage": "Configuration file",
+      "inherited": true
+    },
+    {
+      "type": "BoolFlag",
+      "names": [
+        "color"
+      ],
+      "usage": "Only for the root command"
+    }
+  ],
+  "commands": [
+    {
+      "name": "remote",
+      "aliases": [
+        "r"
+      ],
+      "usage": "Manage remotes",
+      "flags": [
+        {
+          "type": "BoolFlag",
+          "names": [
+            "dry-run"
+          ],
+          "usage": "Show what would change",
+          "inherited": true
+        }
+      ],
+      "commands": [
+        {
+          "name": "add",
+          "usage": "Add a remote",
+          "argsUsage": "\u003cname\u003e \u003curl\u003e",
+          "runnable": true,
+          "handler": "RemoteAdd",
+          "flags": [
+            {
+              "type": "BoolFlag",
+              "names": [
+                "fetch"
+              ],
+              "usage": "Fetch after adding"
+            }
+          ]
+        },
+        {
+          "name": "list",
+          "aliases": [
+            "ls"
+          ],
+          "usage": "List remotes",
+          "argsUsage": "[\u003cpattern\u003e]",
+          "runnable": true,
+          "handler": "RemoteList"
+        },
+        {
+          "name": "set-url",
+          "usage": "Change the URL of a remote",
+          "argsUsage": "\u003cname\u003e \u003curl\u003e",
+          "runnable": true,
+          "handler": "RemoteSetUrl"
+        },
+        {
+          "name": "branch",
+          "usage": "Manage the branches of a remote",
+          "flags": [
+            {
+              "type": "BoolFlag",
+              "names": [
+                "dry-run"
+              ],
+              "usage": "Show what would change",
+              "inherited": true
+            }
+          ],
+          "commands": [
+            {
+              "name": "list",
+              "usage": "List the branches of a remote",
+              "argsUsage": "\u003cremote\u003e",
+              "runnable": true,
+              "handler": "RemoteBranchList"
+            },
+            {
+              "name": "prune",
+              "usage": "Remove stale branches",
+              "hidden": true,
+              "runnable": true,
+              "handler": "RemoteBranchPrune",
+              "flags": [
+                {
+                  "type": "DurationFlag",
+                  "names": [
+                    "older-than"
+                  ],
+                  "usage": "Only branches older than this",
+                  "default": "720h0m0s"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "branch",
+      "usage": "Manage local branches",
+      "category": "Branches",
+      "commands": [
+        {
+          "name": "list",
+          "usage": "List local branches",
+          "runnable": true,
+          "handler": "BranchList"
+        },
+        {
+          "name": "create",
+          "usage": "Create a branch",
+          "argsUsage": "\u003cname\u003e",
+          "runnable": true,
+          "handler": "NewBranch"
+        },
+        {
+          "name": "delete",
+          "aliases": [
+            "rm"
+          ],
+          "usage": "Delete branches",
+          "argsUsage": "\u003cname\u003e...",
+          "runnable": true,
+          "handler": "BranchDelete",
+          "flags": [
+            {
+              "type": "BoolFlag",
+              "names": [
+                "force",
+                "f"
+              ],
+              "usage": "Delete even if unmerged"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "config",
+      "usage": "Read or write configuration",
+      "description": "With no key, prints the whole configuration.",
+      "argsUsage": "[\u003ckey\u003e] [\u003cvalue\u003e]",
+      "runnable": true,
+      "handler": "Config",
+      "commands": [
+        {
+          "name": "edit",
+          "usage": "Open the configuration in an editor",
+          "description": "This command is interactive.",
+          "runnable": true,
+          "handler": "ConfigEdit"
+        }
+      ]
+    },
+    {
+      "name": "admin",
+      "usage": "Maintenance commands",
+      "hidden": true,
+      "commands": [
+        {
+          "name": "gc",
+          "usage": "Collect garbage",
+          "runnable": true,
+          "handler": "AdminGc",
+          "flags": [
+            {
+              "type": "IntFlag",
+              "names": [
+                "keep"
+              ],
+              "usage": "Number of objects to keep",
+              "required": true,
+              "validated": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "sync",
+      "usage": "Synchronise with all remotes",
+      "runnable": true,
+      "handler": "Sync",
+      "flags": [
+        {
+          "type": "BoolFlag",
+          "names": [
+            "dry-run"
+          ],
+          "usage": "Show what would change"
+        }
+      ]
+    }
+  ]
+}

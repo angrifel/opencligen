@@ -30,7 +30,11 @@ func TestGroff(t *testing.T) {
 	if err != nil {
 		t.Skip("groff not found")
 	}
-	for _, f := range []string{"../../specs/golden/all-features/spec.json", "../../testdata/upstream/git.json", "../../testdata/upstream/curl.json"} {
+	files := []string{"../../testdata/upstream/git.json", "../../testdata/upstream/curl.json"}
+	for _, c := range golden.Cases(t, "../..") {
+		files = append(files, c.Spec)
+	}
+	for _, f := range files {
 		m, _, err := spec.LoadFile(f, spec.Options{})
 		if err != nil {
 			t.Fatal(err)
