@@ -11,7 +11,8 @@ import (
 	"github.com/angrifel/opencligen/internal/selfgen"
 )
 
-const kitchen = "../../specs/golden/kitchen/spec.json"
+// The all-features golden case describes a fictional CLI named kitchen.
+const kitchen = "../../specs/golden/all-features/spec.json"
 
 func runCLI(args ...string) (code int, stdout, stderr string) {
 	var out, errw bytes.Buffer
@@ -84,7 +85,7 @@ func TestOutputs(t *testing.T) {
 	}
 	// The default source in the urfave header is the SPEC path as given.
 	data, _ := os.ReadFile(filepath.Join(dir, "k/gen.go"))
-	if !strings.Contains(string(data), "from ../../specs/golden/kitchen/spec.json.") {
+	if !strings.Contains(string(data), "from ../../specs/golden/all-features/spec.json.") {
 		t.Errorf("header does not name the spec: %s", firstLine(string(data)))
 	}
 	data, _ = os.ReadFile(filepath.Join(dir, "k/kit.go"))

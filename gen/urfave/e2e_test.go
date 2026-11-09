@@ -105,7 +105,7 @@ func TestEndToEnd(t *testing.T) {
 		}
 		write(pkg+"/gen.go", string(src))
 	}
-	generate(filepath.Join(root, "specs/golden/kitchen/spec.json"), "kitchen", spec.Options{})
+	generate(filepath.Join(root, "specs/golden/all-features/spec.json"), "kitchen", spec.Options{})
 	generate(filepath.Join(root, "testdata/upstream/git.json"), "git", spec.Options{})
 	generate(filepath.Join(root, "testdata/upstream/curl.json"), "curl", spec.Options{})
 	generate(filepath.Join(root, "testdata/upstream/ffmpeg.json"), "ffmpeg", spec.Options{Lenient: true, AllowCLimits: true})

@@ -19,8 +19,8 @@ func load(t *testing.T, src string) *spec.Model {
 	return m
 }
 
-// TestGolden renders every case in specs/golden; Package is the case name and
-// Source the case's spec path from the repository root.
+// TestGolden renders every case in specs/golden, with the case's package name
+// and its spec path from the repository root as the source.
 func TestGolden(t *testing.T) {
 	for _, c := range golden.Cases(t, "../..") {
 		t.Run(c.Name, func(t *testing.T) {
@@ -28,7 +28,7 @@ func TestGolden(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			src, warns, err := urfave.Generate(m, urfave.Options{Package: c.Name, Source: "specs/golden/" + c.Name + "/spec.json"})
+			src, warns, err := urfave.Generate(m, urfave.Options{Package: c.Package, Source: "specs/golden/" + c.Name + "/spec.json"})
 			if err != nil || len(warns) > 0 {
 				t.Fatalf("err = %v, warnings = %v", err, warns)
 			}

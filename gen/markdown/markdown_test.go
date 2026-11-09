@@ -23,7 +23,7 @@ func TestGolden(t *testing.T) {
 }
 
 func TestIncludeHidden(t *testing.T) {
-	m, _, err := spec.LoadFile("../../specs/golden/kitchen/spec.json", spec.Options{})
+	m, _, err := spec.LoadFile("../../specs/golden/all-features/spec.json", spec.Options{})
 	if err != nil {
 		t.Fatal(err)
 	}

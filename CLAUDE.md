@@ -39,8 +39,10 @@ specs disagree, the specs win. User-facing overview: README.md.
   `specs/opencligen.json`; `main.go` implements its `Handlers`.
 - `specs/`: all specifications and docs (see # Specs). `specs/golden/<case>/`
   holds a golden case: `spec.json` plus one expected file per generator;
-  tests iterate over every case directory. The kitchen case exercises every
-  feature; extend it (or add a case) when adding one.
+  tests iterate over every case directory. The all-features case (a
+  fictional CLI named kitchen) exercises every feature; extend it, or add a
+  case, when adding one. Name cases with plain descriptive words, never
+  idioms: readers may not have English as their first language.
 - `testdata/upstream/`: upstream OpenCLI examples used as a test corpus.
 
 # Decisions

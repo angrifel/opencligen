@@ -6,8 +6,10 @@ package golden
 import (
 	"bytes"
 	"flag"
+	"go/token"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -16,8 +18,9 @@ var update = flag.Bool("update", false, "rewrite golden files")
 // Case is a golden case: a directory under specs/golden holding spec.json and
 // the expected output of each generator.
 type Case struct {
-	Name string // directory name, also used as the Go package name
-	Spec string // path to spec.json from the test's package
+	Name    string // directory name, such as "all-features"
+	Package string // Go package name for generated code: Name without hyphens
+	Spec    string // path to spec.json from the test's package
 }
 
 // Cases lists the golden cases. root is the path from the test's package to
@@ -38,7 +41,11 @@ func Cases(t *testing.T, root string) []Case {
 		if _, err := os.Stat(spec); err != nil {
 			t.Fatalf("golden case %s: %v", e.Name(), err)
 		}
-		cases = append(cases, Case{Name: e.Name(), Spec: spec})
+		pkg := strings.ReplaceAll(e.Name(), "-", "")
+		if !token.IsIdentifier(pkg) {
+			t.Fatalf("golden case %s: %q is not a valid Go package name", e.Name(), pkg)
+		}
+		cases = append(cases, Case{Name: e.Name(), Package: pkg, Spec: spec})
 	}
 	if len(cases) == 0 {
 		t.Fatalf("no golden cases in %s", dir)
