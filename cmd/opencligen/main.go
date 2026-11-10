@@ -167,7 +167,14 @@ func (h *handlers) write(path string, data []byte) error {
 	return nil
 }
 
+// buildVersion is set by release builds (see .goreleaser.yaml) to the release
+// tag, such as "v0.1.0".
+var buildVersion string
+
 func version() string {
+	if buildVersion != "" {
+		return buildVersion
+	}
 	if bi, ok := debug.ReadBuildInfo(); ok && bi.Main.Version != "" {
 		return bi.Main.Version
 	}

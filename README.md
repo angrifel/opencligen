@@ -124,6 +124,20 @@ make update-upstream  # refresh the OpenCLI schema and examples
 The upstream examples in [testdata/upstream](testdata/upstream) are used as
 a test corpus.
 
+### Commits and releases
+
+Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/)
+(`feat: ...`, `fix(urfave): ...`); they become the changelog. Releases use
+[Cocogitto](https://docs.cocogitto.io) and [GoReleaser](https://goreleaser.com):
+
+```sh
+make hooks            # check each commit message as you commit
+make check-commits    # check all commit messages
+make release          # next version from the commits: CHANGELOG.md, commit, tag
+make snapshot         # build the release archives locally into dist/
+make publish          # publish the tag as a draft GitHub release
+```
+
 ## License
 
 MIT; see [LICENSE](LICENSE).

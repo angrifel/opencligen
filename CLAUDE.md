@@ -195,6 +195,33 @@ specs disagree, the specs win. User-facing overview: README.md.
   the document: it reuses the backing array and corrupts the source bytes
   (a past bug; see TestMultiDefaultDoesNotCorruptDocument).
 
+# Releases
+
+Tools (user decision): Cocogitto (`cog`, cog.toml) for versions, CHANGELOG.md
+and tags; GoReleaser (.goreleaser.yaml) for archives and the GitHub release.
+Both are external binaries, not Go tool dependencies.
+
+- Every commit message follows Conventional Commits: `type(scope): subject`,
+  lower-case subject, body as usual. Types used here: feat, fix, docs, test,
+  refactor, chore, build, ci, perf. Scopes are package or area names (cli,
+  urfave, docs, parser). The subject becomes a CHANGELOG line, so write it
+  for users. Commits before this convention were rewritten to follow it.
+- `make check-commits` runs `cog check` from the first commit after the empty
+  root commit: cog ranges include their first commit, and the root has no
+  message. Keep the empty root commit; do not reword it.
+- `make hooks` installs a commit-msg hook (`cog verify`); the user installs
+  it themselves.
+- `make release`: check-commits, then `cog bump --auto`, which runs
+  `make test` (pre_bump_hooks), updates CHANGELOG.md, commits
+  `chore(version): ...` and tags `vX.Y.Z`. Nothing is pushed.
+- `make snapshot`: GoReleaser builds every archive into dist/ without a tag
+  or publishing.
+- `make publish`: for the tag at HEAD, `cog changelog --at <tag>` becomes the
+  release notes (GoReleaser's own changelog is disabled), and GoReleaser
+  publishes a draft GitHub release. Needs GITHUB_TOKEN and a remote.
+- Release builds set main.buildVersion to the tag via ldflags; --version
+  falls back to Go build info, then "(devel)".
+
 # Status
 
 - Publishing is on hold (user decision): no remote, no version tags. The

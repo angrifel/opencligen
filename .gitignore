@@ -1,0 +1,4 @@
+# GoReleaser output (make snapshot, make publish)
+/dist/
+# Release notes written by make publish
+/.release-notes.md

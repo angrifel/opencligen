@@ -1,0 +1,27 @@
+# Cocogitto configuration (https://docs.cocogitto.io).
+#
+# Commit messages follow Conventional Commits. `make release` runs
+# `cog bump --auto`, which picks the next version from the commits since the
+# last tag, updates CHANGELOG.md, commits and creates the tag. Publishing the
+# release is done separately by GoReleaser (`make publish`).
+
+# Go modules need "v"-prefixed tags, such as v0.1.0.
+tag_prefix = "v"
+branch_whitelist = ["master"]
+ignore_merge_commits = true
+
+# Never tag a version that does not pass the tests.
+pre_bump_hooks = ["make test"]
+post_bump_hooks = []
+
+[changelog]
+path = "CHANGELOG.md"
+template = "default"
+authors = []
+
+# Installed into .git/hooks by `make hooks`.
+[git_hooks.commit-msg]
+script = """#!/bin/sh
+set -e
+cog verify --file "$1"
+"""

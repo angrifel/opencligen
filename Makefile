@@ -5,7 +5,7 @@ OPENCLI_RAW := https://raw.githubusercontent.com/spectreconsole/open-cli/$(OPENC
 
 UPSTREAM_EXAMPLES := git curl dotnet ffmpeg
 
-.PHONY: test vet generate update-golden update-upstream
+.PHONY: test vet generate update-golden update-upstream check-commits hooks release snapshot publish
 
 ## generate: regenerate opencligen's own CLI code and docs from specs/opencligen.json
 # Uses the generator packages directly (internal/selfgen), not the opencligen
@@ -31,3 +31,30 @@ update-upstream:
 	for e in $(UPSTREAM_EXAMPLES); do \
 		curl -fsSL $(OPENCLI_RAW)/examples/$$e.json -o testdata/upstream/$$e.json || exit 1; \
 	done
+
+# Releases: Cocogitto (cog.toml) for versions, CHANGELOG.md and tags;
+# GoReleaser (.goreleaser.yaml) for archives and the GitHub release.
+
+## check-commits: check that commit messages follow Conventional Commits
+# The range starts at the first commit after the empty root commit, which has
+# no message (cog ranges include their first commit).
+check-commits:
+	cog check $$(git rev-list --reverse HEAD | sed -n 2p)..HEAD
+
+## hooks: install the git hook that checks each new commit message
+hooks:
+	cog install-hook --all
+
+## release: pick the next version from the commits, update CHANGELOG.md, commit and tag (runs make test first)
+release: check-commits
+	cog bump --auto
+
+## snapshot: build the release archives into dist/ without tagging or publishing
+snapshot:
+	goreleaser release --snapshot --clean
+
+## publish: publish the release for the tag at HEAD as a GitHub draft (needs GITHUB_TOKEN; publishing is on hold)
+publish:
+	tag=$$(git describe --tags --exact-match) && \
+	cog changelog --at $$tag > .release-notes.md && \
+	goreleaser release --clean --release-notes .release-notes.md

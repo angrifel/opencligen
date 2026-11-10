@@ -1,0 +1,55 @@
+# GoReleaser configuration (https://goreleaser.com).
+#
+# GoReleaser builds the release archives and publishes the GitHub release for
+# a tag created by Cocogitto (`make release`). Release notes come from
+# Cocogitto's changelog (`make publish` passes them in), so GoReleaser's own
+# changelog is disabled. `make snapshot` builds everything locally without
+# publishing.
+version: 2
+
+project_name: opencligen
+
+before:
+  hooks:
+    # Fail instead of releasing with an untidy go.mod.
+    - go mod tidy -diff
+
+builds:
+  - id: opencligen
+    main: ./cmd/opencligen
+    binary: opencligen
+    env:
+      - CGO_ENABLED=0
+    goos: [linux, darwin, windows]
+    goarch: [amd64, arm64]
+    flags:
+      - -trimpath
+    ldflags:
+      # The release tag (v0.1.0), or the snapshot version for make snapshot.
+      - -s -w -X main.buildVersion={{ if .IsSnapshot }}{{ .Version }}{{ else }}{{ .Tag }}{{ end }}
+
+archives:
+  - id: opencligen
+    formats: [tar.gz]
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+    files:
+      - LICENSE
+      - README.md
+      - specs/cli.md
+      - specs/opencligen.1
+      - specs/extensions.md
+
+checksum:
+  name_template: checksums.txt
+
+changelog:
+  disable: true
+
+release:
+  github:
+    owner: angrifel
+    name: opencligen
+  # Releases are created as drafts, to be reviewed and published on GitHub.
+  draft: true
