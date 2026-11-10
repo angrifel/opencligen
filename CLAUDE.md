@@ -20,12 +20,14 @@ specs disagree, the specs win. User-facing overview: README.md.
 - `make test`: vet, gofmt check, all tests (includes building generated code).
 - `make update-golden`: accept intended changes to generator output; review the
   diff of the .json files in specs/golden before committing.
-- `make update-upstream`: refresh schema/ and testdata/upstream/ from
+- `make update-upstream`: refresh internal/opencli/schema/ and
+  testdata/upstream/ from
   OPENCLI_REF in the Makefile.
 
 # Layout
 
-- `schema/<major.minor>/schema.json`: upstream OpenCLI schemas, unmodified,
+- `internal/opencli/schema/<major.minor>/schema.json`: upstream OpenCLI
+  schemas, unmodified,
   embedded. One directory per supported version.
 - `internal/opencli/ast`: the resolved model (`ast.Model`, commands, options,
   arguments, values), diagnostics, and `ast.Source`, which maps JSON pointers
@@ -33,9 +35,10 @@ specs disagree, the specs win. User-facing overview: README.md.
 - `internal/opencli/parser`: reads a document, validates it and builds an
   `ast.Model` (`parser.LoadFile`, `parser.Options`). All parsing and
   semantic rules live here.
-- `gen/urfave`, `gen/markdown`, `gen/man`: outputs; `gen/docs` has shared
+- `internal/gen/urfave`, `internal/gen/markdown`, `internal/gen/man`:
+  outputs; `internal/gen/docs` has shared
   helpers for the documentation outputs.
-- `gen/urfave/runtime/`: helpers that the urfave output copies into every
+- `internal/gen/urfave/runtime/`: helpers that the urfave output copies into every
   generated file (see "urfave output" below).
 - `internal/selfgen/`: generates opencligen's own CLI files; shared by
   `make generate` and TestGeneratedFilesUpToDate.
@@ -55,19 +58,20 @@ specs disagree, the specs win. User-facing overview: README.md.
 
 ## Architecture
 
-- The parser and model live under internal/opencli (user decision):
-  `ast` holds the model types, `parser` the reading and validating, named
-  after go/ast and go/parser. Being internal, they are not a public library
-  API. Files that also use the standard library's go/ast or go/parser
+- Everything except the opencligen command is internal (user decision):
+  opencligen is a tool, not a library. The parser and model live under
+  internal/opencli (`ast` holds the model types, `parser` the reading and
+  validating, named after go/ast and go/parser; `schema` the embedded
+  OpenCLI schemas), and the outputs under internal/gen. Files that also use the standard library's go/ast or go/parser
   import those as goast and goparser.
 - Generators render only from `ast.Model`; they never re-read the JSON. A new
-  output is a new package under gen/ that walks the model.
+  output is a new package under internal/gen/ that walks the model.
 - Generator-specific problems are reported with `Model.Diagnostic`, so they
   carry file:line:col like loader errors.
 - Library code takes options structs (`parser.Options`, `urfave.Options`, ...);
   no package-level state.
 - Generated code must not depend on opencligen (user decision): the urfave
-  output embeds its helpers. They live in gen/urfave/runtime as a real,
+  output embeds its helpers. They live in internal/gen/urfave/runtime as a real,
   tested package; the generator go:embeds runtime.go and copies everything
   after its import block, and the generated file's imports are taken from
   that block plus "context". Rules for runtime.go: unexported identifiers
@@ -156,7 +160,7 @@ specs disagree, the specs win. User-facing overview: README.md.
 
 - Generated Go code is tested for structure and properties, never as text
   (user decision: byte-exact Go goldens broke on harmless reordering).
-  gen/urfave/structure_test.go builds the generated code, dumps the
+  internal/gen/urfave/structure_test.go builds the generated code, dumps the
   urfave/cli tree that New returns, checks it against the description
   (every command and option at every depth), runs every runnable command to
   find the handler it reaches, checks that ancestors' recursive options are
@@ -166,7 +170,8 @@ specs disagree, the specs win. User-facing overview: README.md.
   as an independent statement of the mapping; do not derive them from the
   generator.
 - The docs outputs are tested the same way (user decision, options M2 and
-  R2): gen/markdown and gen/man read the output back into an outline
+  R2): internal/gen/markdown and internal/gen/man read the output back into
+  an outline
   (outline_test.go, roff_test.go), check it against the description and
   compare it with markdown.json / man.json. The roff reader rejects requests
   and escapes it does not know, so adding one to the generator means
@@ -176,10 +181,10 @@ specs disagree, the specs win. User-facing overview: README.md.
 
 - Every user-visible error message has a case in
   internal/opencli/parser/load_test.go or
-  gen/urfave/urfave_test.go, including its line:col where relevant.
-- gen/urfave/scratch_test.go provides the throwaway module both build tests
+  internal/gen/urfave/urfave_test.go, including its line:col where relevant.
+- internal/gen/urfave/scratch_test.go provides the throwaway module both build tests
   use: it requires only urfave/cli (GOPROXY=off), so generated code that
-  depends on opencligen fails to build. gen/urfave/e2e_test.go builds the
+  depends on opencligen fails to build. internal/gen/urfave/e2e_test.go builds the
   all-features CLI (named kitchen) with hand-written handlers and checks
   runtime behaviour. Both build tests are skipped with -short.
 - Upstream corpus expectations (dotnet has real duplicate names; ffmpeg needs

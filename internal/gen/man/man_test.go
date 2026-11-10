@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/angrifel/opencligen/gen/man"
+	"github.com/angrifel/opencligen/internal/gen/man"
 	"github.com/angrifel/opencligen/internal/golden"
 	"github.com/angrifel/opencligen/internal/opencli/parser"
 )
@@ -17,8 +17,8 @@ func TestGroff(t *testing.T) {
 	if err != nil {
 		t.Skip("groff not found")
 	}
-	files := []string{"../../testdata/upstream/git.json", "../../testdata/upstream/curl.json"}
-	for _, c := range golden.Cases(t, "../..") {
+	files := []string{"../../../testdata/upstream/git.json", "../../../testdata/upstream/curl.json"}
+	for _, c := range golden.Cases(t, "../../..") {
 		files = append(files, c.Spec)
 	}
 	for _, f := range files {

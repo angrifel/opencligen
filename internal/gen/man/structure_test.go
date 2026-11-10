@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/angrifel/opencligen/gen/man"
+	"github.com/angrifel/opencligen/internal/gen/man"
 	"github.com/angrifel/opencligen/internal/golden"
 	"github.com/angrifel/opencligen/internal/opencli/ast"
 	"github.com/angrifel/opencligen/internal/opencli/parser"
@@ -23,12 +23,12 @@ func TestStructure(t *testing.T) {
 		golden     bool
 	}
 	var cases []tc
-	for _, c := range golden.Cases(t, "../..") {
+	for _, c := range golden.Cases(t, "../../..") {
 		cases = append(cases, tc{c.Name, c.Spec, true})
 	}
 	cases = append(cases,
-		tc{"upstream-git", "../../testdata/upstream/git.json", false},
-		tc{"upstream-curl", "../../testdata/upstream/curl.json", false})
+		tc{"upstream-git", "../../../testdata/upstream/git.json", false},
+		tc{"upstream-curl", "../../../testdata/upstream/curl.json", false})
 
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
@@ -46,7 +46,7 @@ func TestStructure(t *testing.T) {
 				if err != nil {
 					t.Fatal(err)
 				}
-				golden.Assert(t, "../..", c.name+"/man.json", append(data, '\n'))
+				golden.Assert(t, "../../..", c.name+"/man.json", append(data, '\n'))
 			}
 		})
 	}

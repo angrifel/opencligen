@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/angrifel/opencligen/gen/urfave"
+	"github.com/angrifel/opencligen/internal/gen/urfave"
 	"github.com/angrifel/opencligen/internal/opencli/ast"
 )
 
@@ -28,7 +28,7 @@ func newScratch(t *testing.T) *scratch {
 	if err != nil {
 		t.Skip("go not found")
 	}
-	sum, err := os.ReadFile("../../go.sum")
+	sum, err := os.ReadFile("../../../go.sum")
 	if err != nil {
 		t.Fatal(err)
 	}

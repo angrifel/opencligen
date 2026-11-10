@@ -187,7 +187,7 @@ func (g *generator) header(tree []byte) {
 	g.p("func New(h Handlers) *cli.Command {\nreturn ")
 	g.out.Write(tree)
 	g.p("\n}\n\n")
-	g.p("// The helpers below are copied from opencligen's gen/urfave/runtime\n")
+	g.p("// The helpers below are copied from opencligen's internal/gen/urfave/runtime\n")
 	g.p("// package so that this file depends only on urfave/cli.\n\n")
 	g.p("%s\n", helpers)
 }

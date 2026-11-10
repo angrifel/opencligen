@@ -12,9 +12,9 @@ package selfgen
 import (
 	"path/filepath"
 
-	"github.com/angrifel/opencligen/gen/man"
-	"github.com/angrifel/opencligen/gen/markdown"
-	"github.com/angrifel/opencligen/gen/urfave"
+	"github.com/angrifel/opencligen/internal/gen/man"
+	"github.com/angrifel/opencligen/internal/gen/markdown"
+	"github.com/angrifel/opencligen/internal/gen/urfave"
 	"github.com/angrifel/opencligen/internal/opencli/parser"
 )
 

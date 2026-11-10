@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/angrifel/opencligen/gen/urfave"
+	"github.com/angrifel/opencligen/internal/gen/urfave"
 	"github.com/angrifel/opencligen/internal/opencli/ast"
 	"github.com/angrifel/opencligen/internal/opencli/parser"
 )

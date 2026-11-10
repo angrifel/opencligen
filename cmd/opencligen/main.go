@@ -20,12 +20,12 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"github.com/angrifel/opencligen/cmd/opencligen/internal/app"
-	"github.com/angrifel/opencligen/gen/man"
-	"github.com/angrifel/opencligen/gen/markdown"
-	"github.com/angrifel/opencligen/gen/urfave"
+	"github.com/angrifel/opencligen/internal/gen/man"
+	"github.com/angrifel/opencligen/internal/gen/markdown"
+	"github.com/angrifel/opencligen/internal/gen/urfave"
 	"github.com/angrifel/opencligen/internal/opencli/ast"
 	"github.com/angrifel/opencligen/internal/opencli/parser"
-	"github.com/angrifel/opencligen/schema"
+	"github.com/angrifel/opencligen/internal/opencli/schema"
 )
 
 // Exit codes, as declared in specs/opencligen.json.

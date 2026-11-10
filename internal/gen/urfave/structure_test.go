@@ -79,13 +79,13 @@ type structureCase struct {
 
 func TestStructure(t *testing.T) {
 	var cases []structureCase
-	for _, c := range golden.Cases(t, "../..") {
+	for _, c := range golden.Cases(t, "../../..") {
 		cases = append(cases, structureCase{name: c.Name, pkg: c.Package, path: c.Spec, golden: true})
 	}
 	cases = append(cases,
-		structureCase{name: "upstream-git", pkg: "upstreamgit", path: "../../testdata/upstream/git.json"},
-		structureCase{name: "upstream-curl", pkg: "upstreamcurl", path: "../../testdata/upstream/curl.json"},
-		structureCase{name: "upstream-ffmpeg", pkg: "upstreamffmpeg", path: "../../testdata/upstream/ffmpeg.json",
+		structureCase{name: "upstream-git", pkg: "upstreamgit", path: "../../../testdata/upstream/git.json"},
+		structureCase{name: "upstream-curl", pkg: "upstreamcurl", path: "../../../testdata/upstream/curl.json"},
+		structureCase{name: "upstream-ffmpeg", pkg: "upstreamffmpeg", path: "../../../testdata/upstream/ffmpeg.json",
 			opts: parser.Options{Lenient: true, AllowCLimits: true}},
 	)
 
@@ -135,7 +135,7 @@ func TestStructure(t *testing.T) {
 				if err != nil {
 					t.Fatal(err)
 				}
-				golden.Assert(t, "../..", c.name+"/structure.json", append(want, '\n'))
+				golden.Assert(t, "../../..", c.name+"/structure.json", append(want, '\n'))
 			}
 		})
 	}

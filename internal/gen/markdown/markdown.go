@@ -9,7 +9,7 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/angrifel/opencligen/gen/docs"
+	"github.com/angrifel/opencligen/internal/gen/docs"
 	"github.com/angrifel/opencligen/internal/opencli/ast"
 )
 

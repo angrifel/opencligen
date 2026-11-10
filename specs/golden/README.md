@@ -19,7 +19,7 @@ changes of content or structure do, and show up in review as a diff of the
 
 ## Generated Go code
 
- `gen/urfave/structure_test.go`
+ `internal/gen/urfave/structure_test.go`
 compiles the generated code, walks the urfave/cli command tree that `New`
 returns, and runs command lines against it. It checks three things:
 
@@ -46,7 +46,7 @@ whose git description has 251 commands.
 
 ## Markdown
 
-`gen/markdown/structure_test.go` reads the document back with a small
+`internal/gen/markdown/structure_test.go` reads the document back with a small
 Markdown reader (`outline_test.go`) and checks, against `spec.json`:
 
 - the title, the summary, and a command index that lists every visible
@@ -62,7 +62,7 @@ Markdown reader (`outline_test.go`) and checks, against `spec.json`:
 
 ## Man page
 
-`gen/man/structure_test.go` reads the page back with a roff reader
+`internal/gen/man/structure_test.go` reads the page back with a roff reader
 (`roff_test.go`) and checks the `.TH` header, which sections appear and in
 what order, NAME, SYNOPSIS, DESCRIPTION, the option and argument entries of
 the root, one COMMANDS subsection per visible command in order (synopsis,
@@ -83,7 +83,7 @@ Both document checks also run on the upstream git and curl examples.
 | [minimal](minimal/) | A root command with nothing else: it is runnable and its handler is `Root`. |
 
 The all-features case is also built with a hand-written `Handlers`
-implementation and run by `gen/urfave/e2e_test.go`, which checks runtime
+implementation and run by `internal/gen/urfave/e2e_test.go`, which checks runtime
 behaviour such as defaults, range checks and argument assignment.
 
 ## Naming cases

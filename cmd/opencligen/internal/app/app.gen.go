@@ -162,7 +162,7 @@ func New(h Handlers) *cli.Command {
 	}
 }
 
-// The helpers below are copied from opencligen's gen/urfave/runtime
+// The helpers below are copied from opencligen's internal/gen/urfave/runtime
 // package so that this file depends only on urfave/cli.
 
 // ocliArg describes a positional argument: how many values it takes and how

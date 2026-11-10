@@ -18,7 +18,7 @@ import (
 	"golang.org/x/text/message"
 
 	"github.com/angrifel/opencligen/internal/opencli/ast"
-	"github.com/angrifel/opencligen/schema"
+	"github.com/angrifel/opencligen/internal/opencli/schema"
 )
 
 // Options control how strictly a document is checked.

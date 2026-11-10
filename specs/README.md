@@ -14,7 +14,7 @@ these files win: fix the code, or change the spec deliberately.
 Two related inputs live elsewhere, because they are not opencligen's own
 specification:
 
-- `../schema/<version>/schema.json`: the upstream OpenCLI JSON schemas,
+- `../internal/opencli/schema/<version>/schema.json`: the upstream OpenCLI JSON schemas,
   unmodified. They stay next to the Go package that embeds them.
 - `../testdata/upstream/`: the upstream OpenCLI examples, a third-party test
   corpus.

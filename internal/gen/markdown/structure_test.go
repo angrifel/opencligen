@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/angrifel/opencligen/gen/markdown"
+	"github.com/angrifel/opencligen/internal/gen/markdown"
 	"github.com/angrifel/opencligen/internal/golden"
 	"github.com/angrifel/opencligen/internal/opencli/ast"
 	"github.com/angrifel/opencligen/internal/opencli/parser"
@@ -23,12 +23,12 @@ func TestStructure(t *testing.T) {
 		golden     bool
 	}
 	var cases []tc
-	for _, c := range golden.Cases(t, "../..") {
+	for _, c := range golden.Cases(t, "../../..") {
 		cases = append(cases, tc{c.Name, c.Spec, true})
 	}
 	cases = append(cases,
-		tc{"upstream-git", "../../testdata/upstream/git.json", false},
-		tc{"upstream-curl", "../../testdata/upstream/curl.json", false})
+		tc{"upstream-git", "../../../testdata/upstream/git.json", false},
+		tc{"upstream-curl", "../../../testdata/upstream/curl.json", false})
 
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
@@ -43,14 +43,14 @@ func TestStructure(t *testing.T) {
 				if err != nil {
 					t.Fatal(err)
 				}
-				golden.Assert(t, "../..", c.name+"/markdown.json", append(data, '\n'))
+				golden.Assert(t, "../../..", c.name+"/markdown.json", append(data, '\n'))
 			}
 		})
 	}
 }
 
 func TestIncludeHidden(t *testing.T) {
-	m, _, err := parser.LoadFile("../../specs/golden/nested-commands/spec.json", parser.Options{})
+	m, _, err := parser.LoadFile("../../../specs/golden/nested-commands/spec.json", parser.Options{})
 	if err != nil {
 		t.Fatal(err)
 	}

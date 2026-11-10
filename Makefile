@@ -1,4 +1,4 @@
-# Commit of https://github.com/spectreconsole/open-cli that schema/ and
+# Commit of https://github.com/spectreconsole/open-cli that internal/opencli/schema/ and
 # testdata/upstream/ were taken from.
 OPENCLI_REF := e42891559d59e84b1da8a8901450fa37784597ed
 OPENCLI_RAW := https://raw.githubusercontent.com/spectreconsole/open-cli/$(OPENCLI_REF)
@@ -23,11 +23,11 @@ vet:
 
 ## update-golden: rewrite the expected outputs in specs/golden from the current generators
 update-golden:
-	go test ./gen/urfave ./gen/markdown ./gen/man -run 'TestStructure|TestGolden' -update
+	go test ./internal/gen/urfave ./internal/gen/markdown ./internal/gen/man -run 'TestStructure|TestGolden' -update
 
 ## update-upstream: refresh the embedded schema and the example corpus from OPENCLI_REF
 update-upstream:
-	curl -fsSL $(OPENCLI_RAW)/schema.json -o schema/0.1/schema.json
+	curl -fsSL $(OPENCLI_RAW)/schema.json -o internal/opencli/schema/0.1/schema.json
 	for e in $(UPSTREAM_EXAMPLES); do \
 		curl -fsSL $(OPENCLI_RAW)/examples/$$e.json -o testdata/upstream/$$e.json || exit 1; \
 	done

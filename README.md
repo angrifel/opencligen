@@ -101,7 +101,7 @@ opencligen is used as a command, not as a library.
 ## Supported OpenCLI versions
 
 The OpenCLI schemas are embedded, one per `major.minor` version, under
-[schema/](schema/). Documents with an unknown version are rejected. OpenCLI
+[internal/opencli/schema/](internal/opencli/schema/). Documents with an unknown version are rejected. OpenCLI
 is still a proposal; when a new version is published, its schema is added
 next to the existing ones.
 

@@ -56,7 +56,7 @@ func main() {
 // and checks its runtime behaviour.
 func TestEndToEnd(t *testing.T) {
 	s := newScratch(t)
-	m, _, err := parser.LoadFile("../../specs/golden/all-features/spec.json", parser.Options{})
+	m, _, err := parser.LoadFile("../../../specs/golden/all-features/spec.json", parser.Options{})
 	if err != nil {
 		t.Fatal(err)
 	}
