@@ -5,6 +5,15 @@ OPENCLI_RAW := https://raw.githubusercontent.com/spectreconsole/open-cli/$(OPENC
 
 UPSTREAM_EXAMPLES := git curl dotnet ffmpeg
 
+# Release tools, pinned and installed into .tools/bin on first use (see the
+# Releases section below). Defined first: make expands a rule's
+# prerequisites when it reads the rule, so variables used there must already
+# be set.
+TOOLS      := .tools/bin
+COG        := $(TOOLS)/cog
+GORELEASER := $(TOOLS)/goreleaser
+SYFT       := $(TOOLS)/syft
+
 .PHONY: test vet check notices generate update-golden update-upstream tools check-commits hooks release snapshot publish
 
 ## generate: regenerate opencligen's own CLI code and docs from specs/opencligen.json
@@ -46,10 +55,6 @@ update-upstream:
 # GoReleaser (.goreleaser.yaml) for archives and the GitHub release. Both are
 # pinned and installed into .tools/bin by scripts/install-tools.sh on first
 # use; nothing is installed system-wide.
-TOOLS      := .tools/bin
-COG        := $(TOOLS)/cog
-GORELEASER := $(TOOLS)/goreleaser
-SYFT       := $(TOOLS)/syft
 
 $(COG) $(GORELEASER) $(SYFT): scripts/install-tools.sh
 	scripts/install-tools.sh $(notdir $@) && touch $@
