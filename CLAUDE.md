@@ -58,19 +58,19 @@ specs disagree, the specs win. User-facing overview: README.md.
 
 ## Architecture
 
-- Everything except the opencligen command is internal (user decision):
+- Everything except the opencligen command is internal:
   opencligen is a tool, not a library. The parser and model live under
   internal/opencli (`ast` holds the model types, `parser` the reading and
   validating, named after go/ast and go/parser; `schema` the embedded
-  OpenCLI schemas), and the outputs under internal/gen. Files that also use the standard library's go/ast or go/parser
-  import those as goast and goparser.
+  OpenCLI schemas), and the outputs under internal/gen. Files that also use the standard 
+  library's go/ast or go/parser import those as goast and goparser.
 - Generators render only from `ast.Model`; they never re-read the JSON. A new
   output is a new package under internal/gen/ that walks the model.
 - Generator-specific problems are reported with `Model.Diagnostic`, so they
   carry file:line:col like loader errors.
 - Library code takes options structs (`parser.Options`, `urfave.Options`, ...);
   no package-level state.
-- Generated code must not depend on opencligen (user decision): the urfave
+- Generated code must not depend on opencligen: the urfave
   output embeds its helpers. They live in internal/gen/urfave/runtime as a real,
   tested package; the generator go:embeds runtime.go and copies everything
   after its import block, and the generated file's imports are taken from
@@ -85,9 +85,8 @@ specs disagree, the specs win. User-facing overview: README.md.
   fallback (untypeable x- metadata becomes untyped; urfave limitations get an
   approximation) and always reports a warning.
 - C limit constants (INT_MAX, -FLT_MAX, I64_MIN, ...) are accepted only with
-  `AllowCLimits` / `--allow-c-limits`. The user decided this must be opt-in,
-  separate from `--lenient`. Plain numeric strings ("12", "2.14748e+09") are
-  accepted by default.
+  `AllowCLimits` / `--allow-c-limits`. Plain numeric strings ("12", "2.14748e+09")
+  are accepted by default.
 - Unknown metadata names are ignored, so documents written for other tools
   still load.
 - Documents with an OpenCLI version that has no schema directory are rejected.
@@ -146,8 +145,8 @@ specs disagree, the specs win. User-facing overview: README.md.
   OnUsageError so run() reports every error itself.
 - Global flags (--lenient, --allow-c-limits) are recursive root options, so
   they work before or after the command. groupOptions is false.
-- Running with no arguments prints help and exits 0 (urfave behaviour). This
-  is a user decision: exit 2 ("invalid usage", like go, curl, tar) was
+- Running with no arguments prints help and exits 0 (urfave behaviour). 
+  exit 2 ("invalid usage", like go, curl, tar) was
   considered and rejected in favour of what docker, gh, cargo and kubectl
   do.
 - Exit codes: 0 ok, 1 invalid description or generation error, 2 usage.
@@ -159,7 +158,7 @@ specs disagree, the specs win. User-facing overview: README.md.
 # Testing
 
 - Generated Go code is tested for structure and properties, never as text
-  (user decision: byte-exact Go goldens broke on harmless reordering).
+  (byte-exact Go goldens broke on harmless reordering).
   internal/gen/urfave/structure_test.go builds the generated code, dumps the
   urfave/cli tree that New returns, checks it against the description
   (every command and option at every depth), runs every runnable command to
@@ -169,7 +168,7 @@ specs disagree, the specs win. User-facing overview: README.md.
   changes, keep the property checks and wantHandler/wantFlagType in the test
   as an independent statement of the mapping; do not derive them from the
   generator.
-- The docs outputs are tested the same way (user decision, options M2 and
+- The docs outputs are tested the same way (options M2 and
   R2): internal/gen/markdown and internal/gen/man read the output back into
   an outline
   (outline_test.go, roff_test.go), check it against the description and
@@ -197,9 +196,19 @@ specs disagree, the specs win. User-facing overview: README.md.
 
 # Releases
 
-Tools (user decision): Cocogitto (`cog`, cog.toml) for versions, CHANGELOG.md
+Tools: Cocogitto (`cog`, cog.toml) for versions, CHANGELOG.md
 and tags; GoReleaser (.goreleaser.yaml) for archives and the GitHub release.
-Both are external binaries, not Go tool dependencies.
+
+- Nothing is installed system-wide. scripts/install-tools.sh
+  downloads pinned versions into .tools/bin (git-ignored) and checks each
+  download against a pinned SHA-256; the Makefile installs a tool on first
+  use (`make tools` installs both). Always call them as .tools/bin/cog and
+  .tools/bin/goreleaser, never from PATH.
+- To upgrade a tool, change its version and every platform's checksum in
+  the script. GoReleaser checksums come from its release's checksums.txt;
+  Cocogitto publishes none, so its were computed from the downloads.
+- GoReleaser is deliberately not a Go tool dependency (`go tool`): it would
+  add hundreds of modules to go.mod. Cocogitto is a Rust binary.
 
 - Every commit message follows Conventional Commits: `type(scope): subject`,
   lower-case subject, body as usual. Types used here: feat, fix, docs, test,
@@ -209,8 +218,8 @@ Both are external binaries, not Go tool dependencies.
 - `make check-commits` runs `cog check` from the first commit after the empty
   root commit: cog ranges include their first commit, and the root has no
   message. Keep the empty root commit; do not reword it.
-- `make hooks` installs a commit-msg hook (`cog verify`); the user installs
-  it themselves.
+- `make hooks` installs a commit-msg hook that runs .tools/bin/cog verify;
+  the user installs it themselves.
 - `make release`: check-commits, then `cog bump --auto`, which runs
   `make test` (pre_bump_hooks), updates CHANGELOG.md, commits
   `chore(version): ...` and tags `vX.Y.Z`. Nothing is pushed.
@@ -221,13 +230,6 @@ Both are external binaries, not Go tool dependencies.
   publishes a draft GitHub release. Needs GITHUB_TOKEN and a remote.
 - Release builds set main.buildVersion to the tag via ldflags; --version
   falls back to Go build info, then "(devel)".
-
-# Status
-
-- Publishing is on hold (user decision): no remote, no version tags. The
-  README's install instructions describe the intended published state;
-  consumers such as sheila use a local `replace` meanwhile.
-- License: MIT (LICENSE).
 
 # Git
 

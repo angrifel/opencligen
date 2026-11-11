@@ -128,7 +128,9 @@ a test corpus.
 
 Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/)
 (`feat: ...`, `fix(urfave): ...`); they become the changelog. Releases use
-[Cocogitto](https://docs.cocogitto.io) and [GoReleaser](https://goreleaser.com):
+[Cocogitto](https://docs.cocogitto.io) and [GoReleaser](https://goreleaser.com).
+Nothing needs installing: the targets below download pinned, checksum-verified
+versions of both into `.tools/bin` on first use (`make tools` does it up front).
 
 ```sh
 make hooks            # check each commit message as you commit

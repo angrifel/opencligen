@@ -23,5 +23,5 @@ authors = []
 [git_hooks.commit-msg]
 script = """#!/bin/sh
 set -e
-cog verify --file "$1"
+"$(git rev-parse --show-toplevel)/.tools/bin/cog" verify --file "$1"
 """

@@ -5,7 +5,7 @@ OPENCLI_RAW := https://raw.githubusercontent.com/spectreconsole/open-cli/$(OPENC
 
 UPSTREAM_EXAMPLES := git curl dotnet ffmpeg
 
-.PHONY: test vet generate update-golden update-upstream check-commits hooks release snapshot publish
+.PHONY: test vet generate update-golden update-upstream tools check-commits hooks release snapshot publish
 
 ## generate: regenerate opencligen's own CLI code and docs from specs/opencligen.json
 # Uses the generator packages directly (internal/selfgen), not the opencligen
@@ -33,28 +33,39 @@ update-upstream:
 	done
 
 # Releases: Cocogitto (cog.toml) for versions, CHANGELOG.md and tags;
-# GoReleaser (.goreleaser.yaml) for archives and the GitHub release.
+# GoReleaser (.goreleaser.yaml) for archives and the GitHub release. Both are
+# pinned and installed into .tools/bin by scripts/install-tools.sh on first
+# use; nothing is installed system-wide.
+TOOLS      := .tools/bin
+COG        := $(TOOLS)/cog
+GORELEASER := $(TOOLS)/goreleaser
+
+$(COG) $(GORELEASER): scripts/install-tools.sh
+	scripts/install-tools.sh $(notdir $@) && touch $@
+
+## tools: install the pinned release tools into .tools/bin
+tools: $(COG) $(GORELEASER)
 
 ## check-commits: check that commit messages follow Conventional Commits
 # The range starts at the first commit after the empty root commit, which has
 # no message (cog ranges include their first commit).
-check-commits:
-	cog check $$(git rev-list --reverse HEAD | sed -n 2p)..HEAD
+check-commits: $(COG)
+	$(COG) check $$(git rev-list --reverse HEAD | sed -n 2p)..HEAD
 
 ## hooks: install the git hook that checks each new commit message
-hooks:
-	cog install-hook --all
+hooks: $(COG)
+	$(COG) install-hook --all
 
 ## release: pick the next version from the commits, update CHANGELOG.md, commit and tag (runs make test first)
 release: check-commits
-	cog bump --auto
+	$(COG) bump --auto
 
 ## snapshot: build the release archives into dist/ without tagging or publishing
-snapshot:
-	goreleaser release --snapshot --clean
+snapshot: $(GORELEASER)
+	$(GORELEASER) release --snapshot --clean
 
 ## publish: publish the release for the tag at HEAD as a GitHub draft (needs GITHUB_TOKEN; publishing is on hold)
-publish:
+publish: $(COG) $(GORELEASER)
 	tag=$$(git describe --tags --exact-match) && \
-	cog changelog --at $$tag > .release-notes.md && \
-	goreleaser release --clean --release-notes .release-notes.md
+	$(COG) changelog --at $$tag > .release-notes.md && \
+	$(GORELEASER) release --clean --release-notes .release-notes.md

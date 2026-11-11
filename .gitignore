@@ -1,3 +1,5 @@
+# Release tools installed by scripts/install-tools.sh
+/.tools/
 # GoReleaser output (make snapshot, make publish)
 /dist/
 # Release notes written by make publish
