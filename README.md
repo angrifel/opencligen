@@ -158,9 +158,11 @@ make push-release     # git push --atomic origin master <tag>
 
 The release workflow (`.github/workflows/release.yaml`) then runs every
 check, builds the archives, the source archive, the SBOM and checksums,
-attests them, verifies the attestations, and creates a draft release with
-the version's notes from `CHANGELOG.md`. Review the draft on GitHub and
-publish it.
+attests them, verifies the attestations, and creates a draft release.
+The release notes are generated from the commit messages
+(`cog changelog --at <tag>`), the same text as the version's section in
+`CHANGELOG.md`; editing `CHANGELOG.md` does not change them. Review the
+draft on GitHub, edit the notes there if needed, and publish it.
 
 ## License
 

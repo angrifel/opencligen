@@ -4,8 +4,8 @@
 # The workflow runs every check, then creates a draft GitHub release with
 # GoReleaser (`make publish`): binaries for Linux, macOS and Windows, the
 # source archive, an SPDX SBOM and checksums, with the notes of this version
-# from CHANGELOG.md. It then attests, with Sigstore-signed GitHub
-# attestations,
+# generated from the commit messages (`cog changelog --at <tag>`). It then
+# attests, with Sigstore-signed GitHub attestations,
 #
 #   - the build provenance of every file in checksums.txt, and
 #   - the SBOM, for every archive,

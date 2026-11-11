@@ -301,7 +301,9 @@ it), which runs .github/workflows/release.yaml, and that workflow runs `make che
   clone with a temporary tag.
 - `make publish` (run by the release workflow): for the tag at HEAD,
   `cog changelog --at <tag>` becomes the release notes (GoReleaser's own
-  changelog is disabled), and GoReleaser creates a draft GitHub release with
+  changelog is disabled). The notes are regenerated from the commit
+  messages, not read from CHANGELOG.md, so editing CHANGELOG.md does not
+  change them; fix wording in the draft on GitHub. Then GoReleaser creates a draft GitHub release with
   the binary archives, a source archive, an SPDX SBOM of the source (syft)
   and checksums.txt. Tags with a suffix (v0.2.0-rc.1) become prereleases.
 - Attestations, after `make publish` in the workflow: build provenance for
