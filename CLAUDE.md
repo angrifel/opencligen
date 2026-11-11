@@ -228,6 +228,12 @@ and tags; GoReleaser (.goreleaser.yaml) for archives and the GitHub release.
 - `make publish`: for the tag at HEAD, `cog changelog --at <tag>` becomes the
   release notes (GoReleaser's own changelog is disabled), and GoReleaser
   publishes a draft GitHub release. Needs GITHUB_TOKEN and a remote.
+- Releases are drafts (`draft: true`) so the notes and archives get a last
+  look on GitHub before the release becomes public and notifies watchers;
+  publishing the draft is one click and changes nothing else.
+- Changelog entries credit only the commit author: release/changelog.tera is
+  Cocogitto's default template without the Co-Authored-By credits. When
+  upgrading Cocogitto, compare it with the new default template.
 - Release builds set main.buildVersion to the tag via ldflags; --version
   falls back to Go build info, then "(devel)".
 
