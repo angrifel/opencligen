@@ -65,7 +65,7 @@ check-commits: $(COG)
 
 ## hooks: install the git hooks: commit messages are checked on commit, make check runs on push
 hooks: $(COG)
-	$(COG) install-hook --all
+	$(COG) install-hook --all --overwrite
 
 ## release: pick the next version from the commits, update CHANGELOG.md, commit and tag (runs make test first)
 release: check-commits
