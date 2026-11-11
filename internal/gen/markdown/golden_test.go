@@ -13,11 +13,11 @@ import (
 	"github.com/angrifel/opencligen/internal/opencli/parser"
 )
 
-// TestStructure reads the generated Markdown back into an outline and checks
+// TestGoldenCases reads the generated Markdown back into an outline and checks
 // it against the description, so layout changes (spacing, table padding,
 // blank lines) never fail a test. For golden cases the outline is also
 // compared with specs/golden/<case>/markdown.json.
-func TestStructure(t *testing.T) {
+func TestGoldenCases(t *testing.T) {
 	type tc struct {
 		name, path string
 		golden     bool

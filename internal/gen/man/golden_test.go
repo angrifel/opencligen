@@ -13,11 +13,11 @@ import (
 	"github.com/angrifel/opencligen/internal/opencli/parser"
 )
 
-// TestStructure reads the generated man page back into sections and blocks
+// TestGoldenCases reads the generated man page back into sections and blocks
 // and checks it against the description, so the choice of roff requests and
 // line breaks never fails a test. For golden cases the parsed page is also
 // compared with specs/golden/<case>/man.json.
-func TestStructure(t *testing.T) {
+func TestGoldenCases(t *testing.T) {
 	type tc struct {
 		name, path string
 		golden     bool

@@ -77,7 +77,7 @@ type structureCase struct {
 	golden          bool // compare with specs/golden/<name>/structure.json
 }
 
-func TestStructure(t *testing.T) {
+func TestGoldenCases(t *testing.T) {
 	var cases []structureCase
 	for _, c := range golden.Cases(t, "../../..") {
 		cases = append(cases, structureCase{name: c.Name, pkg: c.Package, path: c.Spec, golden: true})

@@ -23,7 +23,7 @@ vet:
 
 ## update-golden: rewrite the expected outputs in specs/golden from the current generators
 update-golden:
-	go test ./internal/gen/urfave ./internal/gen/markdown ./internal/gen/man -run 'TestStructure|TestGolden' -update
+	go test ./internal/gen/urfave ./internal/gen/markdown ./internal/gen/man -run TestGoldenCases -update
 
 ## update-upstream: refresh the embedded schema and the example corpus from OPENCLI_REF
 update-upstream:

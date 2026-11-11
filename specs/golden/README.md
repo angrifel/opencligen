@@ -17,10 +17,30 @@ spacing, table padding, which roff requests are used) never fail a test;
 changes of content or structure do, and show up in review as a diff of the
 `.json` files.
 
+## Where the tests are
+
+Every case directory is picked up automatically by `golden.Cases`
+(`internal/golden/golden.go`), and `golden.Assert` compares a result with the
+case's expected file (or rewrites it with `-update`).
+
+| Expected file | Test |
+|---|---|
+| `structure.json` | `TestGoldenCases` in `internal/gen/urfave/golden_test.go` |
+| `markdown.json` | `TestGoldenCases` in `internal/gen/markdown/golden_test.go` |
+| `man.json` | `TestGoldenCases` in `internal/gen/man/golden_test.go` |
+| (none; renders each page) | `TestGroff` in `internal/gen/man/man_test.go` |
+
+Run only the golden cases with
+
+```sh
+go test ./internal/gen/... -run 'TestGoldenCases|TestGroff' -v
+```
+
+Each case is a subtest, for example `TestGoldenCases/nested-commands`.
+
 ## Generated Go code
 
- `internal/gen/urfave/structure_test.go`
-compiles the generated code, walks the urfave/cli command tree that `New`
+`internal/gen/urfave/golden_test.go` compiles the generated code, walks the urfave/cli command tree that `New`
 returns, and runs command lines against it. It checks three things:
 
 1. **Properties derived from `spec.json`**, for every command at every depth:
@@ -46,7 +66,7 @@ whose git description has 251 commands.
 
 ## Markdown
 
-`internal/gen/markdown/structure_test.go` reads the document back with a small
+`internal/gen/markdown/golden_test.go` reads the document back with a small
 Markdown reader (`outline_test.go`) and checks, against `spec.json`:
 
 - the title, the summary, and a command index that lists every visible
@@ -62,7 +82,7 @@ Markdown reader (`outline_test.go`) and checks, against `spec.json`:
 
 ## Man page
 
-`internal/gen/man/structure_test.go` reads the page back with a roff reader
+`internal/gen/man/golden_test.go` reads the page back with a roff reader
 (`roff_test.go`) and checks the `.TH` header, which sections appear and in
 what order, NAME, SYNOPSIS, DESCRIPTION, the option and argument entries of
 the root, one COMMANDS subsection per visible command in order (synopsis,

@@ -159,7 +159,7 @@ specs disagree, the specs win. User-facing overview: README.md.
 
 - Generated Go code is tested for structure and properties, never as text
   (byte-exact Go goldens broke on harmless reordering).
-  internal/gen/urfave/structure_test.go builds the generated code, dumps the
+  internal/gen/urfave/golden_test.go builds the generated code, dumps the
   urfave/cli tree that New returns, checks it against the description
   (every command and option at every depth), runs every runnable command to
   find the handler it reaches, checks that ancestors' recursive options are
