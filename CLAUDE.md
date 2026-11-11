@@ -61,6 +61,60 @@ generator's output. When code and specs disagree, the specs win. User-facing ove
   idioms: readers may not have English as their first language.
 - `testdata/upstream/`: upstream OpenCLI examples used as a test corpus.
 
+# Internal API
+
+The tests compile against these names; keep them stable or update the tests
+with them.
+
+- `internal/opencli/ast`
+  - `Model{OpenCLI, Info, Conventions, Root *Command, Source *Source}`;
+    `Info{Title, Summary, Description, Version, Contact *Contact, License
+    *License}`; `Conventions{GroupOptions bool, OptionSeparator string}`.
+  - `Command{Name, Aliases, Summary, Description, Hidden, Interactive,
+    Examples, ExitCodes []ExitCode, Category, Usage []string, Documentation,
+    Options []*Option, Arguments []*Argument, Commands []*Command, Parent,
+    Metadata, Pointer}` with `Path`, `FullName`, `IsRoot`, `Runnable`,
+    `InheritedOptions`, `Walk`, `ArgsUsage`, `Synopsis`.
+  - `Option{Name, Aliases, Names (normalised, primary first), ValueNames,
+    Description, Group, Required, Hidden, Recursive, Value, Metadata,
+    Pointer}` with `ValueUsage`. `Argument{Name, Description, Group,
+    Required, Hidden, MinCount, MaxCount, Value, Metadata, Pointer}`.
+  - `Value{Type, Explicit, TakesValue, Multi, Accepted, Default []any, Min,
+    Max any}` with `Numeric`, `HasDefault`, `HasRange`, `DefaultText`,
+    `RangeText`; defaults and bounds hold string, bool, int64, uint64,
+    float64 or time.Duration. `Type` constants `String`, `Int`, `Uint`,
+    `Float`, `Bool` ("boolean"), `Duration`. `FormatValue(any) string`.
+  - `Metadata []MetadataEntry{Name, Value json.RawMessage}` with `Get`.
+  - `Diagnostic{File, Pointer, Line, Column, Severity, Message}` with
+    `String`; `SeverityError`, `SeverityWarning`; `Error{Diagnostics}`;
+    `Model.Diagnostic(sev, ptr, format, args...)`.
+  - `Source{Name, Data}` with `Position(ptr) (line, col)`;
+    `EscapePointer`, `LineCol`.
+- `internal/opencli/parser`: `Options{Lenient, AllowCLimits}`,
+  `LoadFile(path, opts)` and `Load(name, data, opts)`, both returning
+  `(*ast.Model, warnings []ast.Diagnostic, error)` where the error is an
+  `*ast.Error` for invalid descriptions; `ParseNumber(ast.Type, string)`;
+  `FlagName(string)`.
+- `internal/opencli/schema`: `Versions()`, `MajorMinor(v)`, `For(v)
+  ([]byte, error)`.
+- `internal/gen/urfave`: `Options{Package, Source, Lenient}`,
+  `Generate(m, opts) ([]byte, []ast.Diagnostic, error)`. Runtime helpers in
+  `runtime/runtime.go` (package `runtime`): `ocliArg{Name, Min, Max, Check}`,
+  `ocliCheckArgs`, `ocliOneOf`, `ocliNumber`, `ocliBetween[T]`, `ocliEach[T]`,
+  `ocliBool`, `ocliInt`, `ocliUint`, `ocliFloat`, `ocliDuration`,
+  `ocliParsed[T]`.
+- `internal/gen/markdown`: `Options{IncludeHidden}`, `Generate(m, opts)
+  []byte`. `internal/gen/man`: `Options{Section, Date, IncludeHidden}`,
+  `Generate(m, opts) []byte`. `internal/gen/docs`: `Visible`, `Details`,
+  `Commands`, `Options`, `InheritedOptions`, `Arguments`, `OptionNames`,
+  `ValueFacts`.
+- `cmd/opencligen`: `run(args []string, stdout, stderr io.Writer) int` and
+  the exit codes `exitOK`, `exitInvalid`, `exitUsage`; the generated package
+  `internal/app` provides `New(Handlers)`.
+- Test helpers: `internal/golden` (`Case{Name, Package, Spec}`, `Cases`,
+  `Assert`, the `-update` flag) and `internal/selfgen` (`Spec`,
+  `Files(root)`).
+
 # Decisions
 
 ## Architecture

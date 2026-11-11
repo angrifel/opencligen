@@ -10,7 +10,9 @@ general.
 ### Arity and values
 
 - An argument without `arity` takes exactly one value (minimum 1,
-  maximum 1, the schema defaults).
+  maximum 1, the schema defaults). A bound that is left out keeps its
+  default: `{"minimum": 0}` means zero or one value, and `{"minimum": 2}`
+  alone is an error, because its maximum is still 1.
 - An argument that is not `required` may be left out entirely: its effective
   minimum is 0, whatever its arity says. A required argument's minimum is its
   arity minimum.
@@ -41,8 +43,11 @@ general.
 - A command inherits the `recursive` options of all its ancestors, nearest
   ancestor first.
 - An option that is declared again, with the same set of names, by the
-  command itself or by a nearer ancestor replaces the farther one: it is
-  inherited once, from the nearest declaration.
+  command itself (recursive or not) or as a recursive option of a nearer
+  ancestor replaces the farther one: it is inherited once, from the nearest
+  declaration. A non-recursive option of a nearer ancestor does not replace
+  anything, since it does not reach the command; the farther recursive
+  option is still inherited.
 - A command may reuse just some of the names of an inherited option (git's
   `grep -h` next to the inherited `--help`/`-h`). The description is valid;
   whether an output can express it is up to that output (see "urfave/cli
@@ -61,7 +66,86 @@ general.
 - Schema violations are reported one per failing rule, prefixed "does not
   conform to the OpenCLI schema:".
 - With `--lenient`, problems that have a fallback are warnings; the rest stay
-  errors. Warnings never change the exit code.
+  errors. Warnings never change the exit code. Each option or argument gets
+  at most one x- metadata diagnostic: the first problem found, checked in
+  the order duplicates, `x-type`, `x-range`, `x-default`.
+
+### Where each diagnostic points
+
+| Problem | JSON pointer |
+|---|---|
+| Invalid JSON | the offending character |
+| Unsupported OpenCLI version | `/opencli` |
+| Schema violation | the value that violates the rule, or its nearest existing parent |
+| Empty command name | the command's `name` |
+| Duplicate subcommand name or alias | the second subcommand's `name`, also when the clash is an alias |
+| Two options sharing a name | the second option's `name`, or its `aliases` array when the shared name is an alias |
+| Option with an empty name or alias | the option |
+| Arity minimum above maximum | the argument's `arity` |
+| Problem in `x-type`, `x-default` or `x-range` | that metadata entry's `value`; for an array default, the whole array |
+| Problem in `x-category`, `x-usage` or `x-documentation` | that metadata entry's `value` |
+| Option separator urfave/cli cannot use | `/conventions/optionSeparator` |
+| Option with several arguments per use | the option's `arguments` |
+| Shadowed inherited option | the subcommand option's `name` |
+| Invalid `x-go-name` | the command's `metadata` |
+| Two commands with the same handler name | the second command |
+
+### Messages
+
+Messages about one option or argument start with the command path and the
+item, `<command path>: option "<name>": ` or `<command path>: argument
+"<name>": `, followed by one of the x- metadata messages below. Lenient
+warnings end with `; treating it as untyped`.
+
+| Area | Message |
+|---|---|
+| Document | `invalid JSON: <reason>` |
+| | `unsupported OpenCLI version "<v>" (supported: <versions>)` |
+| | `does not conform to the OpenCLI schema: <rule>` |
+| Commands | `command name is empty` |
+| | `<path>: subcommand name "<n>" is declared more than once` |
+| | `<path>: options "<a>" and "<b>" both declare the name "<n>"` |
+| | `<path>: option "<o>" has an empty name or alias` |
+| | `<path>: argument "<a>" has arity minimum <lo> greater than maximum <hi>` |
+| | `<path>: option "<o>" argument "<a>" has arity minimum <lo> greater than maximum <hi>` |
+| | `<path>: x-category must be a string` (likewise `x-documentation`) |
+| | `<path>: x-usage must be a string or an array of strings` |
+| x- metadata | `<name> is declared more than once` |
+| | `x-type must be a string` |
+| | `unsupported x-type "<t>" (supported: string, int, uint, float, boolean, duration)` |
+| | `x-type "<t>" needs the option to take an argument` |
+| | `x-type "<t>" cannot be used for several values` |
+| | `acceptedValues can only be used with x-type string, not "<t>"` |
+| | `x-range must be an object with a minimum and/or maximum: <reason>` |
+| | `x-range needs a minimum or a maximum` |
+| | `x-range can only be used with x-type int, uint or float, not "<t>"` |
+| | `x-range minimum: <value message>` (likewise `maximum`) |
+| | `x-range minimum <lo> is greater than maximum <hi>` |
+| | `x-default must be an array for several values` |
+| | `x-default: <value message>` |
+| Value messages | `"<text>" is not a valid <type>` |
+| | `<json> is not a number` |
+| | `"<text>" is a C limit constant; enable AllowCLimits (--allow-c-limits) to accept it` |
+| | `<json> is not a valid string` / `is not a valid boolean` |
+| | `<json> is not a duration string such as "1m30s"` |
+| | `"<text>" is not one of the accepted values (<a>, <b>)` |
+| | `<value> is below the x-range minimum <lo>` / `is above the x-range maximum <hi>` |
+| urfave/cli output | `option separator "<s>" is not supported by urfave/cli, which only accepts " " and "="` |
+| | `option "<o>" takes <n> arguments per use, which urfave/cli flags cannot express` |
+| | `<path>: option "<o>" reuses the name "<n>" of the recursive option "<p>"; urfave/cli would drop "<p>" entirely in this subcommand` |
+| | `<path>: x-go-name must be an exported Go identifier, got <json>` |
+| | `commands "<a>" and "<b>" both map to handler method <M>; set x-go-name on one of them` |
+| | `invalid package name "<p>"` |
+| Generated code, at run time | `<command>: expected at least <n> argument(s), got <m>` (likewise `at most`) |
+| | `<command>: invalid value "<v>" for <arg> (accepted: <a>, <b>)` |
+| | `invalid value <v> for <name> (minimum: <lo>)` (likewise `maximum`) |
+| | `invalid value "<v>" for <name> (expected true or false)` |
+| | `invalid value "<v>" for <name> (expected an integer)`; also `a non-negative integer`, `a number`, `a duration such as "1m30s"` |
+
+In run-time messages `<name>` is the option as declared (`--heat`, `-k`) or
+the argument as `<dish>`. Positional argument errors are prefixed with the
+command's full name; flag errors are wrapped by urfave/cli in
+`invalid value "<v>" for flag -<name>: ...`.
 
 ## Usage lines
 
@@ -139,6 +223,11 @@ handler:
   per use (lenient: a repeatable flag); a subcommand option that reuses some
   names of an inherited recursive option, because urfave/cli would drop the
   whole inherited option in that subcommand (lenient: generated as is).
+- The shadowing check skips options urfave/cli provides itself: a
+  subcommand option named `help` (or the root's `version`) is not generated,
+  and an inherited `help` or `version` option may lose a short name such as
+  `-h` to a subcommand option, which urfave/cli handles. This is what lets
+  git's `grep -h` coexist with the inherited `--help`/`-h`.
 
 ### Generated file
 
@@ -146,7 +235,18 @@ handler:
   and value checks are copied into it from `internal/gen/urfave/runtime` as
   unexported functions prefixed `ocli`.
 - It starts with `// Code generated by opencligen from <source>. DO NOT EDIT.`,
-  where the source is the description's path as given, or `--source`.
+  where the source is the description's path as given, or `--source`, then
+  the package clause and imports (the standard library packages the helpers
+  use, `context`, and urfave/cli).
+- The `Handlers` interface is documented as `// Handlers implements the
+  commands described in <source>.`, each method as `// <Method> runs
+  `<command path>`.`, and `New` as `// New returns the <root> command tree
+  wired to h.`
+- After `New` comes the comment `// The helpers below are copied from
+  opencligen's internal/gen/urfave/runtime` / `// package so that this file
+  depends only on urfave/cli.`, then the helpers verbatim.
+- The order of fields inside each `cli.Command` or flag literal is not
+  specified; tests check the resulting command tree, not the source text.
 
 ## Documentation outputs
 
@@ -168,3 +268,139 @@ handler:
   when it has content. Paragraphs inside an option, argument or exit status
   entry stay indented under it.
 - An output file whose content would not change is not rewritten.
+
+### Markdown details
+
+- The facts table has rows Version, License (`name (identifier)`, linked to
+  the license URL), Contact (the name linked to the contact URL, then the
+  email as a `mailto:` link) and Documentation (the link).
+- A command's notes are the lines of one paragraph, each ended by a hard
+  line break, in this order and when they apply: ``Aliases: `c` ``,
+  `Category: Meals`, `Interactive: this command prompts for input.`,
+  `Hidden.` (only shown with `--hidden`), and `Documentation: <link>` (for
+  commands other than the root, whose link is in the facts table).
+- Option and argument rows: the value cell is the placeholder in code, a
+  space, then the value details; the description cell is `Required. `
+  (when required), the description, then ` Group: <group>.` (when grouped).
+
+A command section, from the all-features case:
+
+````markdown
+## `kitchen cook`
+
+Cook a dish
+
+Cooks the given dish with the given options.
+
+Aliases: `c`
+Category: Meals
+
+```
+kitchen cook [options] <dish> [<servings>]
+```
+
+### Options
+
+| Option | Value | Description |
+|---|---|---|
+| `--heat` | `<level>` int; 1..9; default: 5 | Heat level |
+| `--style` | `<style>` one of: plain, fancy; default: plain | Group: Presentation. |
+| `--weights`, `-w` | `<kg>...` float; >= 0; default: 0.5, 2 |  |
+| `--batch` | `<id>` uint | Required. |
+
+### Inherited options
+
+| Option | Value | Description |
+|---|---|---|
+| `--verbose`, `-v` |  | Print more |
+
+### Arguments
+
+| Argument | Values | Description |
+|---|---|---|
+| `<dish>` | one of: pasta, soup, salad | Required. |
+| `<servings>` | int; 1..12 | How many people |
+
+### Examples
+
+```
+kitchen cook pasta 2
+```
+
+### Exit codes
+
+| Code | Description |
+|---|---|
+| 0 | Served |
+````
+
+### Man page details
+
+- A subsection starts with the synopsis: an `x-usage` as a literal block
+  (`.nf` … `.fi`), otherwise `.B <full name>` followed by the rest of the
+  synopsis. Then the description (or the summary when there is no
+  description), `Aliases: a, b.`, and `This command prompts for input.` for
+  interactive commands, each as its own paragraph.
+- Then the labelled lists `Options:`, `Arguments:`, `Examples:` (an indented
+  literal block) and `Exit status:`, each when it has content. Subsections
+  list a command's own options only: no inherited options and no category.
+- Entry bodies are `Required. ` (when required), the description, then the
+  value details in parentheses.
+- SEE ALSO lists, one per line: `Documentation: <url>`, `Contact: <name>,
+  <email>, <url>` (the parts that are set) and `License: <name or
+  identifier>`.
+
+The same command, from the all-features case:
+
+```roff
+.SS "kitchen cook"
+.nf
+kitchen cook [options] <dish> [<servings>]
+.fi
+.PP
+Cook a dish
+.PP
+Cooks the given dish with the given options.
+.PP
+Aliases: c.
+.PP
+\fBOptions:\fR
+.TP
+\fB\-\-heat\fR \fI<level>\fR
+Heat level (int; 1..9; default: 5)
+.TP
+\fB\-\-batch\fR \fI<id>\fR
+Required. (uint)
+.PP
+\fBArguments:\fR
+.TP
+\fIdish\fR
+Required. (one of: pasta, soup, salad)
+.PP
+\fBExamples:\fR
+.PP
+.RS 4
+.nf
+kitchen cook pasta 2
+.fi
+.RE
+.PP
+\fBExit status:\fR
+.TP
+\fB0\fR
+Served
+```
+
+## The opencligen command
+
+- `validate` prints `<path>: valid OpenCLI <version> description`.
+- Diagnostics are printed to standard error, one per line; when there are
+  errors, they are followed by `opencligen: <n> error(s)` and the exit
+  status is 1.
+- Usage errors (unknown flags or commands, wrong argument counts) print
+  `opencligen: <error>` and `Run "opencligen --help" for usage.` to standard
+  error, with exit status 2.
+- No arguments, `help` and `--help` print help and exit 0.
+- `--version` prints `opencligen version <version> (OpenCLI <versions>)`,
+  where the version is the release tag set at build time, else the module
+  version from Go's build information, else `(devel)`.
