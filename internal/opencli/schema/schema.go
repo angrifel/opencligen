@@ -3,7 +3,8 @@
 // Each supported OpenCLI major.minor version has its own directory holding
 // the upstream schema.json, taken unmodified from
 // https://github.com/spectreconsole/open-cli (see the Makefile for the pinned
-// commit).
+// commit). The schemas are MIT-licensed, Copyright (c) 2025 Patrik Svensson
+// and contributors; see LICENSE-open-cli.md in this directory.
 package schema
 
 import (

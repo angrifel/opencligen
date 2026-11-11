@@ -143,4 +143,6 @@ make publish          # publish the tag as a draft GitHub release
 
 ## License
 
-MIT; see [LICENSE](LICENSE).
+MIT; see [LICENSE](LICENSE). The binary also contains third-party software,
+including the OpenCLI JSON schema (MIT, Patrik Svensson and contributors);
+their licenses are in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

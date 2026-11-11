@@ -5,7 +5,7 @@ OPENCLI_RAW := https://raw.githubusercontent.com/spectreconsole/open-cli/$(OPENC
 
 UPSTREAM_EXAMPLES := git curl dotnet ffmpeg
 
-.PHONY: test vet check generate update-golden update-upstream tools check-commits hooks release snapshot publish
+.PHONY: test vet check notices generate update-golden update-upstream tools check-commits hooks release snapshot publish
 
 ## generate: regenerate opencligen's own CLI code and docs from specs/opencligen.json
 # Uses the generator packages directly (internal/selfgen), not the opencligen
@@ -20,7 +20,12 @@ test: vet
 ## check: everything a change must pass; run by the pre-push hook and by CI
 check: test check-commits $(GORELEASER)
 	go mod tidy -diff
+	@scripts/third-party-notices.sh | diff -u THIRD_PARTY_NOTICES.md - || { echo "THIRD_PARTY_NOTICES.md is out of date: run make notices"; exit 1; }
 	$(GORELEASER) check --quiet
+
+## notices: regenerate THIRD_PARTY_NOTICES.md from the modules compiled into the binary
+notices:
+	scripts/third-party-notices.sh > THIRD_PARTY_NOTICES.md
 
 vet:
 	go vet ./...

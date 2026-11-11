@@ -300,6 +300,17 @@ and tags; GoReleaser (.goreleaser.yaml) for archives and the GitHub release.
 - Release builds set main.buildVersion to the tag via ldflags; --version
   falls back to Go build info, then "(devel)".
 
+# Third-party notices
+
+- THIRD_PARTY_NOTICES.md lists the licenses of everything compiled into the
+  binary: the Go standard library, the modules from `go list -deps
+  ./cmd/opencligen`, and the embedded OpenCLI schema. It ships in every
+  release archive. `make notices` regenerates it; `make check` fails when it
+  is stale, so run `make notices` after changing dependencies.
+- The OpenCLI schema and the upstream examples are MIT
+  (spectreconsole/open-cli); their license is kept next to them as
+  LICENSE-open-cli.md in internal/opencli/schema and testdata/upstream.
+
 # Git
 
 - The default branch is `master`, not `main`.

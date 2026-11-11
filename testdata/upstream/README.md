@@ -2,7 +2,9 @@
 
 Unmodified copies of the example descriptions from
 https://github.com/spectreconsole/open-cli/tree/e42891559d59e84b1da8a8901450fa37784597ed/examples,
-used as a test corpus. Refresh them with `make update-upstream`.
+used as a test corpus. Refresh them with `make update-upstream`. They are
+MIT-licensed, Copyright (c) 2025 Patrik Svensson and contributors; see
+[LICENSE-open-cli.md](LICENSE-open-cli.md).
 
 Known issues in this corpus, which the tests assert on:
 
