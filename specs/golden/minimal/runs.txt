@@ -1,0 +1,13 @@
+# Command lines for the reference hello CLI and what they must produce.
+# The format is described in specs/golden/README.md.
+
+# A root without subcommands runs itself and takes no arguments.
+$
+handler: Root
+args: []
+
+$ extra
+error: hello: expected at most 0 argument(s), got 1
+
+$ --version
+output: hello version 1.0.0

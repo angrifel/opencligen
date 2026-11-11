@@ -1,0 +1,91 @@
+# Command lines for the reference kitchen CLI and what they must produce.
+# The format is described in specs/golden/README.md.
+
+# Defaults apply when flags are left out.
+$ cook --batch 1 pasta
+handler: Cook
+args: [pasta]
+--heat: 5
+--timer: 1m30s
+--style: plain
+--weights: [0.5 2]
+--salt: true
+--batch: 1
+--secret: false
+--verbose: false
+
+# Aliases of commands and flags, repeated flags, a boolean with a value, and
+# a recursive flag given after the command.
+$ c --batch 2 -v --heat 9 -w 1 -w 3 --salt false soup 4
+handler: Cook
+args: [soup 4]
+--heat: 9
+--weights: [1 3]
+--salt: false
+--batch: 2
+--verbose: true
+
+# A recursive flag given before the command.
+$ -v cook --batch 1 salad
+--verbose: true
+
+# Hidden flags still work.
+$ cook --batch 1 --secret pasta
+--secret: true
+
+# Flag values are checked against their type, accepted values and range.
+$ cook --batch 1 --heat 10 pasta
+error: invalid value 10 for --heat (maximum: 9)
+
+$ cook --batch 1 --style ugly pasta
+error: invalid value "ugly" for --style (accepted: plain, fancy)
+
+$ cook --batch 1 --salt maybe pasta
+error: invalid value "maybe" for --salt (expected true or false)
+
+$ cook --batch 1 --timer 5x pasta
+error: invalid value "5x" for flag -timer
+
+$ cook pasta
+error: Required flag "batch" not set
+
+# So are positional arguments.
+$ cook --batch 1 rice
+error: kitchen cook: invalid value "rice" for <dish> (accepted: pasta, soup, salad)
+
+$ cook --batch 1 pasta 13
+error: kitchen cook: invalid value 13 for <servings> (maximum: 12)
+
+$ cook --batch 1 pasta lots
+error: invalid value "lots" for <servings> (expected an integer)
+
+# A group command that takes arguments runs itself, with zero to three
+# values; its subcommand has its own arity.
+$ pantry
+handler: Pantry
+args: []
+
+$ pantry a b c
+handler: Pantry
+args: [a b c]
+
+$ pantry a b c d
+error: expected at most 3 argument(s), got 4
+
+$ pantry add x y
+handler: AddToPantry
+args: [x y]
+
+$ pantry add
+error: kitchen pantry add: expected at least 1 argument(s), got 0
+
+# Hidden commands still run.
+$ debug
+handler: Debug
+
+# urfave/cli provides --version and --help; help shows defaults.
+$ --version
+output: kitchen version 1.2.3
+
+$ cook --help
+output: Heat level (default: 5)

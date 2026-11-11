@@ -1,0 +1,106 @@
+# Command lines for the reference repo CLI and what they must produce.
+# The format is described in specs/golden/README.md.
+
+# A command three levels down gets the root's recursive options and its own.
+$ remote add origin https://example.com/repo.git
+handler: RemoteAdd
+args: [origin https://example.com/repo.git]
+--fetch: false
+--dry-run: false
+--verbose: false
+--config:
+
+# Recursive options can be given at any level of the command line.
+$ -v --config repo.toml remote --dry-run add --fetch origin url
+handler: RemoteAdd
+--fetch: true
+--dry-run: true
+--verbose: true
+--config: repo.toml
+
+# At the fourth level, both the redeclared --dry-run of "remote branch" and
+# the root's options apply.
+$ remote branch list --verbose --dry-run origin
+handler: RemoteBranchList
+args: [origin]
+--dry-run: true
+--verbose: true
+
+# The same command name under different parents reaches different handlers.
+$ remote list
+handler: RemoteList
+
+$ branch list
+handler: BranchList
+
+# Command aliases at different levels.
+$ r ls orig*
+handler: RemoteList
+args: [orig*]
+
+$ branch rm -f old other
+handler: BranchDelete
+args: [old other]
+--force: true
+
+$ branch delete
+error: repo branch delete: expected at least 1 argument(s), got 0
+
+# x-go-name below the root.
+$ branch create feature
+handler: NewBranch
+args: [feature]
+
+# A recursive option applies only to its own subtree: --dry-run of "remote"
+# does not reach "branch", and "sync" has its own, separate --dry-run.
+$ branch list --dry-run
+error: flag provided but not defined: -dry-run
+
+$ sync --dry-run
+handler: Sync
+--dry-run: true
+
+# A root option that is not recursive is accepted before a command, and
+# rejected after it.
+$ --color sync
+handler: Sync
+
+$ sync --color
+error: flag provided but not defined: -color
+
+# A group command that takes arguments runs itself, and its subcommand too.
+$ config
+handler: Config
+args: []
+
+$ config user.name Felipe
+handler: Config
+args: [user.name Felipe]
+
+$ config a b c
+error: expected at most 2 argument(s), got 3
+
+$ config edit
+handler: ConfigEdit
+
+# Hidden commands still run, with their own checks and defaults.
+$ admin gc --keep 3
+handler: AdminGc
+--keep: 3
+
+$ admin gc
+error: Required flag "keep" not set
+
+$ admin gc --keep=-1
+error: invalid value -1 for --keep (minimum: 0)
+
+$ remote branch prune
+handler: RemoteBranchPrune
+--older-than: 720h0m0s
+
+# A group without arguments only shows its help.
+$ remote
+output: Manage remotes
+
+$ --version
+output: repo version 2.0.0

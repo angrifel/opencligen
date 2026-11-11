@@ -190,9 +190,10 @@ generator's output. When code and specs disagree, the specs win. User-facing ove
   internal/gen/urfave/urfave_test.go, including its line:col where relevant.
 - internal/gen/urfave/scratch_test.go provides the throwaway module both build tests
   use: it requires only urfave/cli (GOPROXY=off), so generated code that
-  depends on opencligen fails to build. internal/gen/urfave/e2e_test.go builds the
-  all-features CLI (named kitchen) with hand-written handlers and checks
-  runtime behaviour. Both build tests are skipped with -short.
+  depends on opencligen fails to build. internal/gen/urfave/runs_test.go builds a reference
+  CLI per golden case (generated code plus generated handlers that print
+  what they receive) and replays the case's runs.txt; runtime behaviour is
+  specified there, not in Go test code. Both build tests are skipped with -short.
 - Upstream corpus expectations (dotnet has real duplicate names; ffmpeg needs
   -lenient and -allow-c-limits, 138 warnings) are asserted in
   internal/opencli/parser/load_test.go. Update them deliberately when

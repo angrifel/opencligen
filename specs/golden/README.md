@@ -9,6 +9,7 @@ opencligen must produce from it. The cases are part of the specification.
 | `structure.json` | The command tree that the generated urfave/cli code builds. |
 | `markdown.json` | The outline of `opencligen markdown spec.json`: sections, paragraphs, code blocks, tables and lists. |
 | `man.json` | The outline of `opencligen man spec.json`: the `.TH` header, sections, subsections, paragraphs, literal blocks and tagged entries. |
+| `runs.txt` | Optional. Command lines for the case's reference CLI and what they must produce (see "Reference CLIs" below). |
 
 No output is compared as text. Each test reads the output back into
 structure, checks it against `spec.json`, and compares the structure with the
@@ -29,11 +30,12 @@ case's expected file (or rewrites it with `-update`).
 | `markdown.json` | `TestGoldenCases` in `internal/gen/markdown/golden_test.go` |
 | `man.json` | `TestGoldenCases` in `internal/gen/man/golden_test.go` |
 | (none; renders each page) | `TestGroff` in `internal/gen/man/man_test.go` |
+| `runs.txt` | `TestReferenceRuns` in `internal/gen/urfave/runs_test.go` |
 
 Run only the golden cases with
 
 ```sh
-go test ./internal/gen/... -run 'TestGoldenCases|TestGroff' -v
+go test ./internal/gen/... -run 'TestGoldenCases|TestGroff|TestReferenceRuns' -v
 ```
 
 Each case is a subtest, for example `TestGoldenCases/nested-commands`.
@@ -94,6 +96,38 @@ is installed and fails on warnings.
 
 Both document checks also run on the upstream git and curl examples.
 
+## Reference CLIs
+
+For each case with a `runs.txt`, `TestReferenceRuns` builds a reference CLI:
+the generated urfave/cli code plus a generated `Handlers` implementation in
+which every handler prints
+
+```
+handler: <method name>
+args: [<positional values>]
+--<flag>: <value>        one line per flag that applies to the command
+```
+
+and replays the command lines of `runs.txt`:
+
+```
+# Lines starting with "#" are comments.
+$ cook --batch 1 pasta              the arguments, after the program name
+handler: Cook                       a line that must appear in the output
+--heat: 5
+
+$ cook --batch 1 --heat 10 pasta
+error: invalid value 10 for --heat  the run must fail with this in its error output
+
+$ --version
+output: kitchen version 1.2.3       text that must appear somewhere in the output
+```
+
+A run without `error:` lines must succeed. Output lines only need to appear,
+so a run lists just the flags it is about; `error:` and `output:` match
+substrings, so they keep working when urfave/cli rewords its own messages.
+Arguments are split on spaces; quoting is not supported.
+
 ## Cases
 
 | Case | Covers |
@@ -102,9 +136,9 @@ Both document checks also run on the upstream git and curl examples.
 | [nested-commands](nested-commands/) | A fictional repository tool named `repo` with commands four levels deep (`repo remote branch list`): recursive options declared at the root and at intermediate levels, inherited only by their own subtree; a recursive option redeclared further down; a root option that is not inherited; the same command name (`list`) under three different parents, giving three handlers; aliases and options at several levels; hidden commands at the third level and a hidden group; a group command that takes arguments and has a subcommand; `x-go-name` and `x-category` below the root. |
 | [minimal](minimal/) | A root command with nothing else: it is runnable and its handler is `Root`. |
 
-The all-features case is also built with a hand-written `Handlers`
-implementation and run by `internal/gen/urfave/e2e_test.go`, which checks runtime
-behaviour such as defaults, range checks and argument assignment.
+Every case has a `runs.txt`: defaults, aliases, value and argument checks
+(all-features), inheritance and rejection of options across four levels
+(nested-commands), and a root that runs itself (minimal).
 
 ## Naming cases
 
