@@ -152,12 +152,15 @@ handler:
 
 - Hidden commands, their subcommands, and hidden options and arguments are
   left out unless `--hidden` is given.
-- Markdown: a title (`info.title`, or the root name), the summary and the
-  rest of the description, a table of version, license, contact and
-  documentation link, a nested index of commands, then one section per
-  command (heading: the full name in code) with its usage block and tables of
-  options, inherited options, arguments, subcommands and exit codes, and its
-  examples. Every `|` in a table cell is escaped.
+- Markdown: a title (`info.title`, or the root name), the root's summary and
+  the rest of its description, a table of version, license, contact and
+  documentation link, and a nested index of commands (left out when only one
+  command is documented). Then one section per command, headed by its full
+  name in code. Other commands' sections start with their summary and the
+  rest of their description; the root's does not repeat them. Each section
+  has the usage block, then these subsections when they have content, in
+  this order: Options, Inherited options, Arguments, Subcommands, Examples,
+  Exit codes. Every `|` in a table cell is escaped.
 - Man page: `.TH` with the upper-case root name, the section (1 by default),
   an empty date unless `--date` is given, `<name> <version>` and the title;
   then NAME, SYNOPSIS, DESCRIPTION, OPTIONS, ARGUMENTS, COMMANDS (one
