@@ -133,7 +133,8 @@ Nothing needs installing: the targets below download pinned, checksum-verified
 versions of both into `.tools/bin` on first use (`make tools` does it up front).
 
 ```sh
-make hooks            # check each commit message as you commit
+make check            # everything a change must pass (also run before each push)
+make hooks            # check commit messages on commit, run make check on push
 make check-commits    # check all commit messages
 make release          # next version from the commits: CHANGELOG.md, commit, tag
 make snapshot         # build the release archives locally into dist/

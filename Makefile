@@ -5,7 +5,7 @@ OPENCLI_RAW := https://raw.githubusercontent.com/spectreconsole/open-cli/$(OPENC
 
 UPSTREAM_EXAMPLES := git curl dotnet ffmpeg
 
-.PHONY: test vet generate update-golden update-upstream tools check-commits hooks release snapshot publish
+.PHONY: test vet check generate update-golden update-upstream tools check-commits hooks release snapshot publish
 
 ## generate: regenerate opencligen's own CLI code and docs from specs/opencligen.json
 # Uses the generator packages directly (internal/selfgen), not the opencligen
@@ -16,6 +16,11 @@ generate:
 ## test: vet and run all tests, including building and running generated code
 test: vet
 	go test ./...
+
+## check: everything a change must pass; run by the pre-push hook and by CI
+check: test check-commits $(GORELEASER)
+	go mod tidy -diff
+	$(GORELEASER) check --quiet
 
 vet:
 	go vet ./...
@@ -52,7 +57,7 @@ tools: $(COG) $(GORELEASER)
 check-commits: $(COG)
 	$(COG) check $$(git rev-list --reverse HEAD | sed -n 2p)..HEAD
 
-## hooks: install the git hook that checks each new commit message
+## hooks: install the git hooks: commit messages are checked on commit, make check runs on push
 hooks: $(COG)
 	$(COG) install-hook --all
 

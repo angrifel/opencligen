@@ -1,0 +1,42 @@
+# Runs `make check`, the same checks as the pre-push hook, on every push and
+# pull request. The release tools are installed by the Makefile into
+# .tools/bin, so the runner needs nothing beyond Go, curl and tar.
+name: check
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: make check (Go ${{ matrix.go }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # The version in go.mod, and the latest release.
+        go: [go.mod, stable]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # cog checks every commit message since the first commit.
+          fetch-depth: 0
+
+      - uses: actions/setup-go@v5
+        if: matrix.go == 'go.mod'
+        with:
+          go-version-file: go.mod
+
+      - uses: actions/setup-go@v5
+        if: matrix.go == 'stable'
+        with:
+          go-version: stable
+
+      # So that the man page test renders pages instead of skipping.
+      - name: Install groff
+        run: sudo apt-get update && sudo apt-get install -y groff
+
+      - run: make check

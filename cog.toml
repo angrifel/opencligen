@@ -20,6 +20,12 @@ template = "release/changelog.tera"  # credits only the commit author
 authors = []
 
 # Installed into .git/hooks by `make hooks`.
+[git_hooks.pre-push]
+script = """#!/bin/sh
+set -e
+make -C "$(git rev-parse --show-toplevel)" check
+"""
+
 [git_hooks.commit-msg]
 script = """#!/bin/sh
 set -e

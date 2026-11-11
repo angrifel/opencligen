@@ -13,6 +13,12 @@ specs disagree, the specs win. User-facing overview: README.md.
 
 # Commands
 
+- `make check`: everything a change must pass: `make test`, commit message
+  check, `go mod tidy -diff`, `goreleaser check`. The pre-push hook and the
+  GitHub Actions workflow (.github/workflows/check.yaml, on every push and
+  pull request, with the go.mod Go version and the latest stable) both run
+  exactly this; add new checks to `make check`, not to the workflow. The
+  workflow is inert until the repository has a GitHub remote.
 - `make generate`: regenerate opencligen's own CLI code and docs from
   specs/opencligen.json. Run it after changing the spec or any generator.
   It runs ./internal/selfgen/cmd, which calls the generator packages
@@ -218,7 +224,8 @@ and tags; GoReleaser (.goreleaser.yaml) for archives and the GitHub release.
 - `make check-commits` runs `cog check` from the first commit after the empty
   root commit: cog ranges include their first commit, and the root has no
   message. Keep the empty root commit; do not reword it.
-- `make hooks` installs a commit-msg hook that runs .tools/bin/cog verify;
+- `make hooks` installs a commit-msg hook that runs .tools/bin/cog verify
+  and a pre-push hook that runs `make check`;
   the user installs it themselves.
 - `make release`: check-commits, then `cog bump --auto`, which runs
   `make test` (pre_bump_hooks), updates CHANGELOG.md, commits
