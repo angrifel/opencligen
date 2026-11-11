@@ -14,7 +14,7 @@ COG        := $(TOOLS)/cog
 GORELEASER := $(TOOLS)/goreleaser
 SYFT       := $(TOOLS)/syft
 
-.PHONY: test vet check notices generate update-golden update-upstream tools check-commits hooks release snapshot publish
+.PHONY: test vet check notices generate update-golden update-upstream tools check-commits hooks release push-release snapshot publish
 
 ## generate: regenerate opencligen's own CLI code and docs from specs/opencligen.json
 # Uses the generator packages directly (internal/selfgen), not the opencligen
@@ -75,6 +75,13 @@ hooks: $(COG)
 ## release: pick the next version from the commits, update CHANGELOG.md, commit and tag (runs make test first)
 release: check-commits
 	$(COG) bump --auto
+
+## push-release: push master and the version tag at HEAD, which starts the release workflow
+# Cocogitto creates lightweight tags, which `git push --follow-tags` skips,
+# so the tag is pushed by name, atomically with the branch.
+push-release:
+	tag=$$(git describe --tags --exact-match) && \
+	git push --atomic origin master "$$tag"
 
 ## snapshot: build the release archives into dist/ without tagging or publishing
 snapshot: $(GORELEASER) $(SYFT)

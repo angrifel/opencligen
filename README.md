@@ -153,7 +153,7 @@ make snapshot         # build the release archives locally into dist/
 To publish, push the commit and the tag that `make release` created:
 
 ```sh
-git push --follow-tags
+make push-release     # git push --atomic origin master <tag>
 ```
 
 The release workflow (`.github/workflows/release.yaml`) then runs every

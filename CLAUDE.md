@@ -263,8 +263,9 @@ and tags; GoReleaser (.goreleaser.yaml) for archives and the GitHub release;
 Syft for the SBOM.
 
 Releases are published only by GitHub Actions: `make release` creates the
-commit and tag locally, pushing the tag (`git push --follow-tags`) runs
-.github/workflows/release.yaml, and that workflow runs `make check` and
+commit and tag locally, `make push-release` pushes master and the tag
+(cog's tags are lightweight, so `git push --follow-tags` would not push
+it), which runs .github/workflows/release.yaml, and that workflow runs `make check` and
 `make publish`. Do not run `make publish` locally.
 
 - Nothing is installed system-wide. scripts/install-tools.sh
