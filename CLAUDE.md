@@ -7,9 +7,10 @@ All specs are contained in the `specs/` directory; read specs/README.md
 first. It holds opencligen's own CLI description (specs/opencligen.json),
 the x- metadata vocabulary (specs/extensions.md; keep it in sync with
 internal/opencli/parser/value.go and build.go), the generated CLI reference
-(specs/cli.md, specs/opencligen.1) and the golden cases (specs/golden/),
-which define the exact expected output of every generator. When code and
-specs disagree, the specs win. User-facing overview: README.md.
+(specs/cli.md, specs/opencligen.1), the behaviour that is otherwise only in
+code (specs/behaviour.md; update it with any change to those rules) and the
+golden cases (specs/golden/), which define the expected structure of every
+generator's output. When code and specs disagree, the specs win. User-facing overview: README.md.
 
 # Commands
 
