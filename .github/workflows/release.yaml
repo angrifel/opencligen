@@ -1,0 +1,84 @@
+# Publishes a release when a version tag is pushed (see "Releases" in
+# CLAUDE.md). The tag comes from `make release` (Cocogitto).
+#
+# The workflow runs every check, then creates a draft GitHub release with
+# GoReleaser (`make publish`): binaries for Linux, macOS and Windows, the
+# source archive, an SPDX SBOM and checksums, with the notes of this version
+# from CHANGELOG.md. It then attests, with Sigstore-signed GitHub
+# attestations,
+#
+#   - the build provenance of every file in checksums.txt, and
+#   - the SBOM, for every archive,
+#
+# and verifies both attestations for every file before finishing. The draft
+# is reviewed and published on GitHub.
+name: release
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+      - 'v[0-9]+.[0-9]+.[0-9]+-*'
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write     # create the draft release and upload its files
+      id-token: write     # sign the attestations with Sigstore
+      attestations: write # store the attestations
+    env:
+      TAG: ${{ github.ref_name }}
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          # cog needs the full history for the commit check and the notes.
+          fetch-depth: 0
+
+      - uses: actions/setup-go@v7.0.0
+        with:
+          go-version-file: go.mod
+
+      - name: Install groff
+        run: sudo apt-get update && sudo apt-get install -y groff
+
+      # Never release what does not pass the checks.
+      - run: make check
+
+      - name: Create the draft release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: make publish
+
+      - name: Locate the SBOM
+        run: echo "SBOM=dist/opencligen_${TAG#v}_sbom.spdx.json" >> "$GITHUB_ENV"
+
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@v4.2.2
+        with:
+          subject-checksums: dist/checksums.txt
+
+      - name: Attest the SBOM
+        uses: actions/attest-sbom@v4.1.0
+        with:
+          subject-path: |
+            dist/*.tar.gz
+            dist/*.zip
+          sbom-path: ${{ env.SBOM }}
+
+      - name: Verify the attestations
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -eu
+          for f in $(awk '{print $2}' dist/checksums.txt); do
+            gh attestation verify "dist/$f" --repo "$GITHUB_REPOSITORY" \
+              --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/release.yaml"
+          done
+          for f in dist/*.tar.gz dist/*.zip; do
+            gh attestation verify "$f" --repo "$GITHUB_REPOSITORY" \
+              --predicate-type https://spdx.dev/Document/v2.3
+          done

@@ -49,12 +49,13 @@ update-upstream:
 TOOLS      := .tools/bin
 COG        := $(TOOLS)/cog
 GORELEASER := $(TOOLS)/goreleaser
+SYFT       := $(TOOLS)/syft
 
-$(COG) $(GORELEASER): scripts/install-tools.sh
+$(COG) $(GORELEASER) $(SYFT): scripts/install-tools.sh
 	scripts/install-tools.sh $(notdir $@) && touch $@
 
 ## tools: install the pinned release tools into .tools/bin
-tools: $(COG) $(GORELEASER)
+tools: $(COG) $(GORELEASER) $(SYFT)
 
 ## check-commits: check that commit messages follow Conventional Commits
 # The range starts at the first commit after the empty root commit, which has
@@ -71,11 +72,11 @@ release: check-commits
 	$(COG) bump --auto
 
 ## snapshot: build the release archives into dist/ without tagging or publishing
-snapshot: $(GORELEASER)
-	$(GORELEASER) release --snapshot --clean
+snapshot: $(GORELEASER) $(SYFT)
+	PATH="$(CURDIR)/$(TOOLS):$$PATH" $(GORELEASER) release --snapshot --clean
 
-## publish: publish the release for the tag at HEAD as a GitHub draft (needs GITHUB_TOKEN; publishing is on hold)
-publish: $(COG) $(GORELEASER)
+## publish: create the GitHub draft release for the tag at HEAD; run by the release workflow, needs GITHUB_TOKEN
+publish: $(COG) $(GORELEASER) $(SYFT)
 	tag=$$(git describe --tags --exact-match) && \
 	$(COG) changelog --at $$tag > .release-notes.md && \
-	$(GORELEASER) release --clean --release-notes .release-notes.md
+	PATH="$(CURDIR)/$(TOOLS):$$PATH" $(GORELEASER) release --clean --release-notes .release-notes.md

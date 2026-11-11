@@ -20,17 +20,17 @@ jobs:
         # The version in go.mod, and the latest release.
         go: [go.mod, stable]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7.0.1
         with:
           # cog checks every commit message since the first commit.
           fetch-depth: 0
 
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v7.0.0
         if: matrix.go == 'go.mod'
         with:
           go-version-file: go.mod
 
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v7.0.0
         if: matrix.go == 'stable'
         with:
           go-version: stable
