@@ -259,13 +259,20 @@ with them.
 # Releases
 
 Tools: Cocogitto (`cog`, cog.toml) for versions, CHANGELOG.md
-and tags; GoReleaser (.goreleaser.yaml) for archives and the GitHub release.
+and tags; GoReleaser (.goreleaser.yaml) for archives and the GitHub release;
+Syft for the SBOM.
+
+Releases are published only by GitHub Actions: `make release` creates the
+commit and tag locally, pushing the tag (`git push --follow-tags`) runs
+.github/workflows/release.yaml, and that workflow runs `make check` and
+`make publish`. Do not run `make publish` locally.
 
 - Nothing is installed system-wide. scripts/install-tools.sh
   downloads pinned versions into .tools/bin (git-ignored) and checks each
   download against a pinned SHA-256; the Makefile installs a tool on first
-  use (`make tools` installs both). Always call them as .tools/bin/cog and
-  .tools/bin/goreleaser, never from PATH.
+  use (`make tools` installs all three). Call them as .tools/bin/cog,
+  .tools/bin/goreleaser and .tools/bin/syft; the Makefile puts .tools/bin on
+  PATH only for GoReleaser, which runs syft by name.
 - To upgrade a tool, change its version and every platform's checksum in
   the script. GoReleaser checksums come from its release's checksums.txt;
   Cocogitto publishes none, so its were computed from the downloads.
@@ -287,10 +294,23 @@ and tags; GoReleaser (.goreleaser.yaml) for archives and the GitHub release.
   `make test` (pre_bump_hooks), updates CHANGELOG.md, commits
   `chore(version): ...` and tags `vX.Y.Z`. Nothing is pushed.
 - `make snapshot`: GoReleaser builds every archive into dist/ without a tag
-  or publishing.
-- `make publish`: for the tag at HEAD, `cog changelog --at <tag>` becomes the
-  release notes (GoReleaser's own changelog is disabled), and GoReleaser
-  publishes a draft GitHub release. Needs GITHUB_TOKEN and a remote.
+  or publishing. It needs at least one tag in the repository: without tags
+  GoReleaser uses placeholder git information (commit "none"), and the
+  source archive fails. Before the first release, rehearse in a throwaway
+  clone with a temporary tag.
+- `make publish` (run by the release workflow): for the tag at HEAD,
+  `cog changelog --at <tag>` becomes the release notes (GoReleaser's own
+  changelog is disabled), and GoReleaser creates a draft GitHub release with
+  the binary archives, a source archive, an SPDX SBOM of the source (syft)
+  and checksums.txt. Tags with a suffix (v0.2.0-rc.1) become prereleases.
+- Attestations, after `make publish` in the workflow: build provenance for
+  every file in checksums.txt (actions/attest-build-provenance), the SBOM for
+  every archive (actions/attest-sbom), then `gh attestation verify` of both
+  for every file, so a release whose attestations do not verify fails.
+  The workflow's permissions are contents: write, id-token: write and
+  attestations: write; the default is contents: read.
+- Workflow actions are referenced by exact version (actions/checkout@v7.0.1),
+  kept at the latest release; update them deliberately.
 - Releases are drafts (`draft: true`) so the notes and archives get a last
   look on GitHub before the release becomes public and notifies watchers;
   publishing the draft is one click and changes nothing else.

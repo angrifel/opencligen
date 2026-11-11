@@ -17,11 +17,21 @@ cli.json:61:42: error: sheila generate-parser ll: option "-k": x-default: "x" is
 
 ## Install
 
-opencligen is not published yet; until then, build it from a local
-checkout. Once published:
+With Go 1.24.5 or newer:
 
 ```sh
 go install github.com/angrifel/opencligen/cmd/opencligen@latest
+```
+
+Or download a binary for Linux, macOS or Windows from the
+[releases](https://github.com/angrifel/opencligen/releases). Every release
+file has a signed build provenance attestation, and every archive an SBOM
+attestation; check a download with the GitHub CLI:
+
+```sh
+gh attestation verify opencligen_0.1.0_linux_amd64.tar.gz --repo angrifel/opencligen
+gh attestation verify opencligen_0.1.0_linux_amd64.tar.gz --repo angrifel/opencligen \
+  --predicate-type https://spdx.dev/Document/v2.3
 ```
 
 Or, in a Go module that uses it, as a tool dependency (Go 1.24+):
@@ -138,8 +148,19 @@ make hooks            # check commit messages on commit, run make check on push
 make check-commits    # check all commit messages
 make release          # next version from the commits: CHANGELOG.md, commit, tag
 make snapshot         # build the release archives locally into dist/
-make publish          # publish the tag as a draft GitHub release
 ```
+
+To publish, push the commit and the tag that `make release` created:
+
+```sh
+git push --follow-tags
+```
+
+The release workflow (`.github/workflows/release.yaml`) then runs every
+check, builds the archives, the source archive, the SBOM and checksums,
+attests them, verifies the attestations, and creates a draft release with
+the version's notes from `CHANGELOG.md`. Review the draft on GitHub and
+publish it.
 
 ## License
 
